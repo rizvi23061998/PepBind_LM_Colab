@@ -57,7 +57,7 @@ def featurization(sequences, device, model, tokenizer, batch_size, output_folder
 
 def main():
     #Initialize model 
-    model_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Model/protbert_bfd/"
+    model_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Model/protbert_bfd/prot_bert_bfd/"
     tokenizer = BertTokenizer.from_pretrained(model_folder, do_lower_case=False)
     model = BertModel.from_pretrained(model_folder)
 
