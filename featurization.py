@@ -57,6 +57,7 @@ def featurization(sequences, device, model, tokenizer, batch_size, output_folder
 
 def main():
     #Initialize model 
+    data_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Data/"
     model_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Model/protbert_bfd/prot_bert_bfd/"
     tokenizer = BertTokenizer.from_pretrained(model_folder, do_lower_case=False)
     model = BertModel.from_pretrained(model_folder)
@@ -68,10 +69,15 @@ def main():
     # get_gpu_memory_map()
 
     out_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Features/"
+    with open(data_folder + "train_sequences.pkl", "rb") as fp:
+        train_sequences = pkl.load(fp)
     train_features = featurization(train_sequences,device, model,tokenizer, 32, out_folder)
     with open(out_folder + 'train_feature_all'+ '.pkl', 'wb') as handle:
       pkl.dump(train_features, handle)
     
+    
+    with open(data_folder + "test_sequences.pkl", "rb") as fp:
+        test_sequences = pkl.load(fp)
     test_features = featurization(test_sequences,device, model,tokenizer, 32, out_folder)
     with open(out_folder + 'test_feature_all'+ '.pkl', 'wb') as handle:
         pkl.dump(test_features, handle)
