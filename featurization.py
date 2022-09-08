@@ -45,9 +45,9 @@ def featurization(sequences, device, model, tokenizer, batch_size, output_folder
   for i in range(int(n/batch_size)+1):
     low = int(batch_size)*i
     high = min(int(batch_size)*(i+1), n)
-    print("batch " + str(i) + " starting. Low :",low, ",High:", high)
+    # print("batch " + str(i) + " starting. Low :",low, ",High:", high)
     feature = batch_featurization(sequences[low:high], device, model, tokenizer)
-    print("batch " + str(i) + " features generated.")
+    # print("batch " + str(i) + " features generated.")
     # print(len(feature))
     features.extend(feature)
 
