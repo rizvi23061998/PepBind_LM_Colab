@@ -27,20 +27,20 @@ train_df = pd.read_csv(train_data, lineterminator='>', delimiter='\n', header = 
 
 #Convert to list and Dump as Pickle
 train_sequences = train_df['sequence'].tolist()
-with open(data_folder + "train_sequences.pkl", "wb") as fp:
-  pkl.dump(train_sequences, fp)
-
 train_sequences = [" ".join(sequence) for sequence in train_sequences]
 train_sequences = [re.sub(r"[UZOB]", "X", sequence) for sequence in train_sequences]
 print(len(train_sequences))
+with open(data_folder + "train_sequences.pkl", "wb") as fp:
+  pkl.dump(train_sequences, fp)
+
+
 
 test_sequences = test_df['sequence'].tolist()
-with open(data_folder + "test_sequences.pkl", "wb") as fp:
-  pkl.dump(test_sequences, fp)
-
 test_sequences = [" ".join(sequence) for sequence in test_sequences]
 test_sequences = [re.sub(r"[UZOB]", "X", sequence) for sequence in test_sequences]
 print(len(test_sequences))
+with open(data_folder + "test_sequences.pkl", "wb") as fp:
+  pkl.dump(test_sequences, fp)
 
 
 train_labels = train_df['label'].tolist()
