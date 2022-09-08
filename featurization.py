@@ -74,7 +74,7 @@ def main():
     
     test_features = featurization(test_sequences,device, model,tokenizer, 32, out_folder)
     with open(out_folder + 'test_feature_all'+ '.pkl', 'wb') as handle:
-    pkl.dump(test_features, handle)
+        pkl.dump(test_features, handle)
 
 
 
