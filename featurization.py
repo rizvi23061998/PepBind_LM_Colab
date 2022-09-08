@@ -35,6 +35,7 @@ def batch_featurization(sequences, device, model,tokenizer):
   del attention_mask
   del model
   torch.cuda.empty_cache()
+  return features
 
 
 def featurization(sequences, device, model, tokenizer, batch_size, output_folder):
@@ -47,11 +48,11 @@ def featurization(sequences, device, model, tokenizer, batch_size, output_folder
     print("batch " + str(i) + " starting. Low :",low, ",High:", high)
     feature = batch_featurization(sequences[low:high], device, model, tokenizer)
     print("batch " + str(i) + " features generated.")
-    print(len(feature))
+    # print(len(feature))
     features.extend(feature)
 
     print("batch " + str(i) + " done.")
-    print("Current feature length:", len(features))
+    # print("Current feature length:", len(features))
 
     
   return features
