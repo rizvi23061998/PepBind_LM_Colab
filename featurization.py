@@ -29,7 +29,7 @@ def batch_featurization(sequences, device, model,tokenizer):
     seq_len = (attention_mask[seq_num] == 1).sum()
     seq_emd = embedding[seq_num][1:seq_len-1]
     features.append(seq_emd)
-  
+
   del embedding
   del input_ids
   del attention_mask
@@ -47,6 +47,7 @@ def featurization(sequences, device, model, tokenizer, batch_size, output_folder
     print("batch " + str(i) + " starting. Low :",low, ",High:", high)
     feature = batch_featurization(sequences[low:high], device, model, tokenizer)
     print("batch " + str(i) + " features generated.")
+    print(len(feature))
     features.extend(feature)
 
     print("batch " + str(i) + " done.")
@@ -67,10 +68,12 @@ def main():
     model = model.to(device)
     model = model.eval()
     # get_gpu_memory_map()
+    print("=================Model Loaded!========================")
 
     out_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Features/"
     with open(data_folder + "train_sequences.pkl", "rb") as fp:
         train_sequences = pkl.load(fp)
+    print("Length of train sequences: ", len(train_sequences))
     train_features = featurization(train_sequences,device, model,tokenizer, 32, out_folder)
     with open(out_folder + 'train_feature_all'+ '.pkl', 'wb') as handle:
       pkl.dump(train_features, handle)
@@ -78,6 +81,7 @@ def main():
     
     with open(data_folder + "test_sequences.pkl", "rb") as fp:
         test_sequences = pkl.load(fp)
+    print("Length of test sequences: ", len(test_sequences))
     test_features = featurization(test_sequences,device, model,tokenizer, 32, out_folder)
     with open(out_folder + 'test_feature_all'+ '.pkl', 'wb') as handle:
         pkl.dump(test_features, handle)
