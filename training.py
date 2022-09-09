@@ -141,10 +141,10 @@ def main():
     feature_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Features/"
 
     print("Preparing residue level features .. ...")
-    train_data_res, train_y = prepare_res_features(data_folder, feature_folder, 10)
+    train_data_res, train_y = prepare_res_features(data_folder, feature_folder)
 
     print("Preparing subsets by undersampling ... ...")
-    prepare_subsets(train_data_res, train_y)
+    prepare_subsets(train_data_res, train_y, 10)
 
 
 
