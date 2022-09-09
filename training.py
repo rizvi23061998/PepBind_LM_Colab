@@ -138,103 +138,103 @@ def prepare_subsets(train_data_res, train_y, sample_reps):
         return train_x_subsets, train_y_subsets
 
 def train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=20):
-	# EPOCHS = 20
-	# trainSteps = 256
-	# valSteps = 128
+    # EPOCHS = 20
+    # trainSteps = 256
+    # valSteps = 128
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-	# loop over our epochs
-	for e in range(0, EPOCHS):
-		print("On Epoch = ",e)
-		# set the model in training mode
-		model.train()
-		# print(model.init_conv1.weight)
-		# initialize the total training and validation loss
-		totalTrainLoss = 0
-		totalValLoss = 0
-		# initialize the number of correct predictions in the training
-		# and validation step
-		trainCorrect = 0
-		valCorrect = 0
-		# loop over the training set
-		# for (x, y) in zip(X_train, y_train):
-		for batch_idx in range(0, len(X_train), trainSteps): 
-			# send the input to the device
-			batch_start = batch_idx
-			batch_end = min(batch_start + trainSteps, len(X_train))
+    # loop over our epochs
+    for e in range(0, EPOCHS):
+        print("On Epoch = ",e)
+        # set the model in training mode
+        model.train()
+        # print(model.init_conv1.weight)
+        # initialize the total training and validation loss
+        totalTrainLoss = 0
+        totalValLoss = 0
+        # initialize the number of correct predictions in the training
+        # and validation step
+        trainCorrect = 0
+        valCorrect = 0
+        # loop over the training set
+        # for (x, y) in zip(X_train, y_train):
+        for batch_idx in range(0, len(X_train), trainSteps): 
+            # send the input to the device
+            batch_start = batch_idx
+            batch_end = min(batch_start + trainSteps, len(X_train))
 
-			
-			x_cat = np.stack(X_train[batch_start : batch_end])
-			y_cat = np.stack(y_train[batch_start : batch_end])
-			x = torch.Tensor( x_cat )
-			y = torch.Tensor( y_cat )
-			cur_batch_size = batch_end - batch_start
-			x = np.reshape(x, (cur_batch_size, 1, x_cat.shape[1], x_cat.shape[2]))
-			(x, y) = (x.to(device), y.to(device))
-			# perform a forward pass and calculate the training loss
-			pred = torch.sigmoid(model(x))
-			# pred = torch.round(pred)
-			pred = pred.reshape([cur_batch_size])
-			# print(type(pred), type(y))
-			# print(pred.shape, y.shape)
-			# print(pred)
-			# print(y)
+            
+            x_cat = np.stack(X_train[batch_start : batch_end])
+            y_cat = np.stack(y_train[batch_start : batch_end])
+            x = torch.Tensor( x_cat )
+            y = torch.Tensor( y_cat )
+            cur_batch_size = batch_end - batch_start
+            x = np.reshape(x, (cur_batch_size, 1, x_cat.shape[1], x_cat.shape[2]))
+            (x, y) = (x.to(device), y.to(device))
+            # perform a forward pass and calculate the training loss
+            pred = torch.sigmoid(model(x))
+            # pred = torch.round(pred)
+            pred = pred.reshape([cur_batch_size])
+            # print(type(pred), type(y))
+            # print(pred.shape, y.shape)
+            # print(pred)
+            # print(y)
 
-			# print((pred.argmax(1) == y))
-			# print(pred.get_device(), y.get_device())
-			loss = lossFn(pred, y)
-			# zero out the gradients, perform the backpropagation step,
-			# and update the weights
-			opt.zero_grad()
-			loss.backward()
-			opt.step()
-			# add the loss to the total training loss so far and
-			# calculate the number of correct predictions
-			totalTrainLoss += loss
-			trainCorrect += (pred.argmax(0) == y).type(
-				torch.float).sum().item()
-		
-			# switch off autograd for evaluation
-		with torch.no_grad():
-			# set the model in evaluation mode
-			model.eval()
-			# loop over the validation set
-			for batch_idx in range(0, len(X_val), valSteps):
-				batch_start = batch_idx
-				batch_end = min(batch_start + valSteps, len(X_val))
-				x_cat = np.stack( X_val[batch_start : batch_end] )
-				y_cat = np.stack( y_val[batch_start : batch_end] )
-				x = torch.Tensor( x_cat )
-				y = torch.Tensor( y_cat )
-				cur_batch_size = batch_end - batch_start
-				# send the input to the device
-				x = np.reshape(x, ( cur_batch_size, 1, x_cat.shape[1], x_cat.shape[2]))
-				(x, y) = (x.to(device), y.to(device))
-				# make the predictions and calculate the validation loss
-				pred = torch.sigmoid(model(x))
-				# pred = torch.round(pred)
-				pred = pred.reshape([cur_batch_size])
-				totalValLoss += lossFn(pred, y)
-				# calculate the number of correct predictions
-				valCorrect += (pred.argmax(0) == y).type(
-					torch.float).sum().item()
-		
-		# calculate the average training and validation loss
-		avgTrainLoss = totalTrainLoss / trainSteps
-		avgValLoss = totalValLoss / valSteps
-		# calculate the training and validation accuracy
-		trainCorrect = trainCorrect / len(X_train)
-		valCorrect = valCorrect / len(X_val)
-		# update our training history
-		H["train_loss"].append(avgTrainLoss.cpu().detach().numpy())
-		H["train_acc"].append(trainCorrect)
-		H["val_loss"].append(avgValLoss.cpu().detach().numpy())
-		H["val_acc"].append(valCorrect)
-		# print the model training and validation information
-		print("[INFO] EPOCH: {}/{}".format(e + 1, EPOCHS))
-		print("Train loss: {:.6f}, Train accuracy: {:.4f}".format(
-			avgTrainLoss, trainCorrect))
-		print("Val loss: {:.6f}, Val accuracy: {:.4f}\n".format(
-			avgValLoss, valCorrect))
+            # print((pred.argmax(1) == y))
+            # print(pred.get_device(), y.get_device())
+            loss = lossFn(pred, y)
+            # zero out the gradients, perform the backpropagation step,
+            # and update the weights
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+            # add the loss to the total training loss so far and
+            # calculate the number of correct predictions
+            totalTrainLoss += loss
+            trainCorrect += (pred.argmax(0) == y).type(
+                torch.float).sum().item()
+        
+            # switch off autograd for evaluation
+        with torch.no_grad():
+            # set the model in evaluation mode
+            model.eval()
+            # loop over the validation set
+            for batch_idx in range(0, len(X_val), valSteps):
+                batch_start = batch_idx
+                batch_end = min(batch_start + valSteps, len(X_val))
+                x_cat = np.stack( X_val[batch_start : batch_end] )
+                y_cat = np.stack( y_val[batch_start : batch_end] )
+                x = torch.Tensor( x_cat )
+                y = torch.Tensor( y_cat )
+                cur_batch_size = batch_end - batch_start
+                # send the input to the device
+                x = np.reshape(x, ( cur_batch_size, 1, x_cat.shape[1], x_cat.shape[2]))
+                (x, y) = (x.to(device), y.to(device))
+                # make the predictions and calculate the validation loss
+                pred = torch.sigmoid(model(x))
+                # pred = torch.round(pred)
+                pred = pred.reshape([cur_batch_size])
+                totalValLoss += lossFn(pred, y)
+                # calculate the number of correct predictions
+                valCorrect += (pred.argmax(0) == y).type(
+                    torch.float).sum().item()
+        
+        # calculate the average training and validation loss
+        avgTrainLoss = totalTrainLoss / trainSteps
+        avgValLoss = totalValLoss / valSteps
+        # calculate the training and validation accuracy
+        trainCorrect = trainCorrect / len(X_train)
+        valCorrect = valCorrect / len(X_val)
+        # update our training history
+        H["train_loss"].append(avgTrainLoss.cpu().detach().numpy())
+        H["train_acc"].append(trainCorrect)
+        H["val_loss"].append(avgValLoss.cpu().detach().numpy())
+        H["val_acc"].append(valCorrect)
+        # print the model training and validation information
+        print("[INFO] EPOCH: {}/{}".format(e + 1, EPOCHS))
+        print("Train loss: {:.6f}, Train accuracy: {:.4f}".format(
+            avgTrainLoss, trainCorrect))
+        print("Val loss: {:.6f}, Val accuracy: {:.4f}\n".format(
+            avgValLoss, valCorrect))
 
 def main():
     data_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Data/"
@@ -247,10 +247,10 @@ def main():
     train_x_subsets, train_y_subsets = prepare_subsets(train_data_res, train_y, 10)
 
     H = {
-	"train_loss": [],
-	"train_acc": [],
-	"val_loss": [],
-	"val_acc": []
+    "train_loss": [],
+    "train_acc": [],
+    "val_loss": [],
+    "val_acc": []
     }
 
     # measure how long training is going to take
