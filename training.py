@@ -153,7 +153,7 @@ def train_subset(X_train, y_train, X_val, y_val, model, lossFn, history, trainSt
 		# initialize the number of correct predictions in the training
 		# and validation step
 		trainCorrect = 0
-		valCorrect = 0
+        valCorrect = 0
         print(len(X_train))
 		# loop over the training set
 		# for (x, y) in zip(X_train, y_train):
