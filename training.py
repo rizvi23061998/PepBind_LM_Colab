@@ -25,6 +25,7 @@ from torch import flatten
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, NLLLoss
 from cnn_models import CNN2Layers
+from torchsummary import summary
 
 import time
 import random
@@ -261,6 +262,7 @@ def main():
                                                         test_size=0.2, random_state= 10)
     print(len(X_train), len(y_train))
     model = CNN2Layers(31, 256, 5, 1, 2, 0.5)
+    print(summary(model, (31, 256, 5, 1, 2, 0.5)))
     optim = Adam(model.parameters(), lr=1e-3)
     lossFn = BCEWithLogitsLoss()
     train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, H)
