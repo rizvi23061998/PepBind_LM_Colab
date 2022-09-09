@@ -168,7 +168,7 @@ def train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, history, 
             x = torch.Tensor( x_cat )
             y = torch.Tensor( y_cat )
             cur_batch_size = batch_end - batch_start
-            x = np.reshape(x, (cur_batch_size, 1, x_cat.shape[1], x_cat.shape[2]))
+            x = np.reshape(x, (cur_batch_size, x_cat.shape[1], x_cat.shape[2]))
             (x, y) = (x.to(device), y.to(device))
             # perform a forward pass and calculate the training loss
             pred = torch.sigmoid(model(x))
@@ -207,7 +207,7 @@ def train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, history, 
                 y = torch.Tensor( y_cat )
                 cur_batch_size = batch_end - batch_start
                 # send the input to the device
-                x = np.reshape(x, ( cur_batch_size, 1, x_cat.shape[1], x_cat.shape[2]))
+                x = np.reshape(x, ( cur_batch_size, x_cat.shape[1], x_cat.shape[2]))
                 (x, y) = (x.to(device), y.to(device))
                 # make the predictions and calculate the validation loss
                 pred = torch.sigmoid(model(x))
