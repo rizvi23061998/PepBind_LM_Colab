@@ -243,7 +243,7 @@ def main():
     train_data_res, train_y = prepare_res_features(data_folder, feature_folder)
 
     print("Preparing subsets by undersampling ... ...")
-    prepare_subsets(train_data_res, train_y, 10)
+    train_x_subsets, train_y_subsets = prepare_subsets(train_data_res, train_y, 10)
 
     H = {
 	"train_loss": [],
