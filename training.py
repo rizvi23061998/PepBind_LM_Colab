@@ -73,12 +73,12 @@ def prepare_res_features(data_folder, feature_folder):
     with open(data_folder + "train_labels.pkl", "rb") as fp:
         train_labels = pkl.load(fp)
 
-    print(train_labels)
+    # print(train_labels)
 
     train_labels = [" ".join(train_label) for train_label in train_labels]
     test_labels = [" ".join(test_label) for test_label in test_labels]
 
-    print(train_labels)
+    # print(train_labels)
 
     train_y = [np.fromstring(train_label, dtype=int, sep=' ') for train_label in train_labels]
     test_y = [np.fromstring(test_label, dtype=int, sep=' ') for test_label in test_labels]
@@ -141,7 +141,7 @@ def main():
     feature_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Features/"
 
     print("Preparing residue level features .. ...")
-    train_data_res, train_y = prepare_res_features(data_folder, feature_folder)
+    train_data_res, train_y = prepare_res_features(data_folder, feature_folder, 10)
 
     print("Preparing subsets by undersampling ... ...")
     prepare_subsets(train_data_res, train_y)
