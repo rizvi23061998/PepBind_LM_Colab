@@ -137,7 +137,7 @@ def prepare_subsets(train_data_res, train_y, sample_reps):
 
         return train_x_subsets, train_y_subsets
 
-def train_subset(X_train, y_train, X_val, y_val, model, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=20):
+def train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=20):
 	# EPOCHS = 20
 	# trainSteps = 256
 	# valSteps = 128
@@ -153,8 +153,7 @@ def train_subset(X_train, y_train, X_val, y_val, model, lossFn, history, trainSt
 		# initialize the number of correct predictions in the training
 		# and validation step
 		trainCorrect = 0
-        valCorrect = 0
-        print(len(X_train))
+		valCorrect = 0
 		# loop over the training set
 		# for (x, y) in zip(X_train, y_train):
 		for batch_idx in range(0, len(X_train), trainSteps): 
