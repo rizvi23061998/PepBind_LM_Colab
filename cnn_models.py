@@ -11,11 +11,11 @@ class CNN2Layers(torch.nn.Module):
             torch.nn.ELU(),
             torch.nn.Dropout(dropout),
 
-            torch.nn.Conv1d(in_channels=feature_channels, out_channels=feature_channels/2, kernel_size=kernel_size,
+            torch.nn.Conv2d(in_channels=feature_channels, out_channels=feature_channels/2, kernel_size=kernel_size,
                             stride=stride, padding=padding),
             torch.nn.ELU(),
             torch.nn.Dropout(dropout),
-            torch.nn.Linear((feature_channels/2)*1024, 1)
+            torch.nn.Linear((feature_channels/2)*31, 1)
             
         )
 

@@ -57,11 +57,11 @@ def prepare_res_features(data_folder, feature_folder):
     test_features_padded = []
     for feature in train_features:
         new_feature = np.concatenate([np.zeros((15,1024),dtype=float),feature,np.zeros((15,1024),dtype=float)])
-        train_features_padded.append(new_feature)
+        train_features_padded.append(np.transpose(new_feature))
 
     for feature in test_features:
         new_feature = np.concatenate([np.zeros((15,1024),dtype=float),feature,np.zeros((15,1024),dtype=float)])
-        test_features_padded.append(new_feature)
+        test_features_padded.append(np.transpose(new_feature))
 
     # train_x = np.concatenate(train_features)
     # test_x = np.concatenate(test_features)
@@ -261,7 +261,7 @@ def main():
                                                         stratify=train_y_subsets[0], 
                                                         test_size=0.2, random_state= 10)
     print(len(X_train), len(y_train))
-    model = CNN2Layers(31, 256, 5, 1, 2, 0.5)
+    model = CNN2Layers(1024, 256, 5, 1, 2, 0.5)
     print(summary(model, (31, 256, 5, 1, 2, 0.5)))
     optim = Adam(model.parameters(), lr=1e-3)
     lossFn = BCEWithLogitsLoss()
