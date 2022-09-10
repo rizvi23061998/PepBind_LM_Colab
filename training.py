@@ -57,11 +57,11 @@ def prepare_res_features(data_folder, feature_folder):
     test_features_padded = []
     for feature in train_features:
         new_feature = np.concatenate([np.zeros((15,1024),dtype=float),feature,np.zeros((15,1024),dtype=float)])
-        train_features_padded.append(np.transpose(new_feature))
+        train_features_padded.append((new_feature))
 
     for feature in test_features:
         new_feature = np.concatenate([np.zeros((15,1024),dtype=float),feature,np.zeros((15,1024),dtype=float)])
-        test_features_padded.append(np.transpose(new_feature))
+        test_features_padded.append((new_feature))
 
     # train_x = np.concatenate(train_features)
     # test_x = np.concatenate(test_features)
@@ -89,7 +89,7 @@ def prepare_res_features(data_folder, feature_folder):
     for chain in train_features_padded:
         for residue_idx in range(15,len(chain) - 15):
             residue_feature = chain[(residue_idx - 15): (residue_idx + 16),:]
-            train_data_res.append(residue_feature)
+            train_data_res.append(np.transpose(residue_feature))
         # print(len(chain)-30)
     print(len(train_data_res))
 
@@ -97,7 +97,7 @@ def prepare_res_features(data_folder, feature_folder):
     for chain in test_features_padded:
         for residue_idx in range(15,len(chain) - 15):
             residue_feature = chain[(residue_idx - 15): (residue_idx + 16),:]
-            test_data_res.append(residue_feature)
+            test_data_res.append(np.transpose(residue_feature))
 
     train_y_cat = np.concatenate(train_y)
     train_y = train_y_cat.tolist()
