@@ -11,10 +11,10 @@ class CNN2Layers(torch.nn.Module):
             torch.nn.ELU(),
             torch.nn.Dropout(dropout),
 
-            torch.nn.Conv1d(in_channels=feature_channels, out_channels=feature_channels/2, kernel_size=kernel_size,
+            torch.nn.Conv1d(in_channels=feature_channels, out_channels=int(feature_channels/2), kernel_size=kernel_size,
                             stride=stride, padding=padding),
             torch.nn.ELU(),
-            torch.nn.Dropout(dropout),
+            torch.nn.Dropout(dropout)
         )
         
         self.fc = torch.nn.Linear(int(feature_channels/2)*31, 1)
@@ -23,6 +23,7 @@ class CNN2Layers(torch.nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         x = torch.nn.flatten(x)
+
         x = self.fc(x)
         return x
         # return torch.squeeze(x)
