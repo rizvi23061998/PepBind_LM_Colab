@@ -138,7 +138,7 @@ def prepare_subsets(train_data_res, train_y, sample_reps):
 
         return train_x_subsets, train_y_subsets
 
-def train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=20):
+def train_subset(X_train, y_train, X_val, y_val, model, opt, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=20):
     # EPOCHS = 20
     # trainSteps = 256
     # valSteps = 128
