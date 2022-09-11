@@ -17,7 +17,7 @@ class CNN2Layers(torch.nn.Module):
             torch.nn.Dropout(dropout)
         )
         
-        self.fc = torch.nn.Linear(int(feature_channels/2)*31, 1)
+        self.fc = torch.nn.Linear(int(feature_channels/2)*31*batch_size, 1)
             
 
     def forward(self, x):
