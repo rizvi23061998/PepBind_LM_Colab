@@ -263,9 +263,9 @@ def main():
                                                         stratify=train_y_subsets[0], 
                                                         test_size=0.2, random_state= 10)
     print(len(X_train), len(y_train))
-    model = CNN2Layers(1024, 64, 5, 1, 2, 0.5,128)
+    model = CNN2Layers(1024, 64, 5, 1, 2, 0.1,128)
     # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
-    optim = Adam(model.parameters(), lr=1e-3)
+    optim = Adam(model.parameters(), lr=1e-4)
     lossFn = BCEWithLogitsLoss()
     train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, H)
 
