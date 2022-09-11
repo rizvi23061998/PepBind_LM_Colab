@@ -15,12 +15,14 @@ class CNN2Layers(torch.nn.Module):
                             stride=stride, padding=padding),
             torch.nn.ELU(),
             torch.nn.Dropout(dropout),
-            torch.nn.flatten(),
-            torch.nn.Linear(batch_size * (feature_channels/2)*31, 1)
-            
         )
+        
+        self.fc = torch.nn.Linear(batch_size * (feature_channels/2)*31, 1)
+            
 
     def forward(self, x):
         x = self.conv1(x)
+        x = torch.nn.flatten(x)
+        x = self.fc(x)
         return x
         # return torch.squeeze(x)
