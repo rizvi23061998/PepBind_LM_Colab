@@ -143,6 +143,7 @@ def train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, history, 
     # trainSteps = 256
     # valSteps = 128
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    model.to(device)
     # loop over our epochs
     for e in range(0, EPOCHS):
         print("On Epoch = ",e)
