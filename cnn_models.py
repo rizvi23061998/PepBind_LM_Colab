@@ -22,7 +22,7 @@ class CNN2Layers(torch.nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        x = torch.nn.flatten(x)
+        x = torch.flatten(x)
 
         x = self.fc(x)
         return x
