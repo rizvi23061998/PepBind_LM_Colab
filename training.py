@@ -142,6 +142,7 @@ def train_subset(X_train, y_train, X_val, y_val, model, opt, lossFn, history, tr
     # EPOCHS = 20
     # trainSteps = 256
     # valSteps = 128
+    H = history
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     # loop over our epochs
