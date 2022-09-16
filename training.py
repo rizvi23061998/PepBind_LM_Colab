@@ -189,9 +189,11 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     model.to(device)
     train_size = int(len(data)*.8)
     val_size = len(data) - train_size
+    print(train_size, " ", val_size)
+
     train_data, val_data = random_split(data, [train_size, val_size])
-    train_dataloader = DataLoader(train_data, batch_size = trainSteps, shuffle = True)
-    val_dataloader = DataLoader(val_data, batch_size = valSteps, shuffle = True)
+    train_dataloader = DataLoader(train_data, batch_size = trainSteps, shuffle = True, drop_last=True)
+    val_dataloader = DataLoader(val_data, batch_size = valSteps, shuffle = True, drop_last=True)
     # train_data_loader = 
     # loop over our epochs
     for e in range(0, EPOCHS):
@@ -209,7 +211,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
         # for (x, y) in zip(X_train, y_train):
         for batch_idx, (x, y) in enumerate(train_dataloader):
             (x, y) = (x.to(device), y.to(device))
-            print(x.type())
+            # print(x.type())
             pred = torch.sigmoid(model(x))
             pred = pred.reshape([trainSteps])
             loss = lossFn(pred, y)
