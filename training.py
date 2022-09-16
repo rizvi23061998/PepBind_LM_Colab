@@ -187,7 +187,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     H = history
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model.to(device)
-    train_size = len(data)*.8
+    train_size = int(len(data)*.8)
     val_size = len(data) - train_size
     train_data, val_data = random_split(data, [train_size, val_size])
     train_dataloader = DataLoader(train_data, batch_size = trainSteps, shuffle = True)
