@@ -211,7 +211,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
             (x, y) = (x.to(device), y.to(device))
             print(x.type())
             pred = torch.sigmoid(model(x))
-            pred = pred.reshape([train_steps])
+            pred = pred.reshape([trainSteps])
             loss = lossFn(pred, y)
             # zero out the gradients, perform the backpropagation step,
             # and update the weights
@@ -231,10 +231,8 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
                 for batch_idx, (x,y) in enumerate(val_dataloader):
                     (x, y) = (x.to(device), y.to(device))
                     pred = torch.sigmoid(model(x))
-                    pred = pred.reshape([train_steps])
-                    loss = lossFn(pred, y)
                     pred = pred.reshape([valSteps])
-                    
+                    loss = lossFn(pred, y)                    
                     
                     pred = (pred > 0.5).astype(float)
                     totalValLoss += loss
