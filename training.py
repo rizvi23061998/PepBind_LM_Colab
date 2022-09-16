@@ -221,7 +221,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
 
             pred = (pred>0.5).float()
             totalTrainLoss += loss
-            trainCorrect += (np.array(pred) == np.array(y)).astype(int).sum()
+            trainCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
         
             # switch off autograd for evaluation
             with torch.no_grad():
@@ -237,7 +237,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
                     pred = (pred > 0.5).astype(float)
                     totalValLoss += loss
                     # calculate the number of correct predictions
-                    valCorrect += (np.array(pred) == np.array(y)).astype(int).sum()
+                    valCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
         
         # calculate the average training and validation loss
         avgTrainLoss = totalTrainLoss / trainSteps
