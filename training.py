@@ -24,16 +24,72 @@ from torch.nn import Sigmoid, LogSoftmax
 from torch import flatten
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, NLLLoss
+from torch.utils.data import random_split, DataLoader 
 from cnn_models import CNN2Layers
 from torchsummary import summary
+from dataset import Seq_Dataset
+from dataset import Res_Dataset
 
 import time
 import random
 # import 
 import gc
 
+def prepare_seq_features(data_folder, feature_folder):
+    with open(feature_folder + "train_feature_all.pkl", "rb") as fp:
+        train_features = pkl.load(fp)
 
-def prepare_res_features(data_folder, feature_folder):
+    with open(feature_folder + "test_feature_all.pkl", "rb") as fp:
+        test_features = pkl.load(fp)
+
+    
+    with open(data_folder + "train_sequences.pkl", "rb") as fp:
+        train_sequences = pkl.load(fp)
+    with open(data_folder + "test_sequences.pkl", "rb") as fp:
+        test_sequences = pkl.load(fp)
+
+    with open(data_folder + "test_labels.pkl", "rb") as fp:
+        test_labels = pkl.load( fp)
+    with open(data_folder + "train_labels.pkl", "rb") as fp:
+        train_labels = pkl.load(fp)
+    
+    max_len_train = -1
+    max_len_test = -1
+    train_chain_lengths = []
+    test_chain_lengths = []
+    for feature in train_features:
+        if max_len_train < len(feature):
+            max_len_train = len(feature)
+        train_chain_lengths.append(len(feature))
+         
+    for feature in test_features:
+        if max_len_test < len(feature):
+            max_len_test = len(feature)
+        test_chain_lengths.append(len(feature))
+    
+    max_len = max_len_train if (max_len_train > max_len_test) else max_len_test
+
+    train_labels = [" ".join(train_label) for train_label in train_labels]
+    test_labels = [" ".join(test_label) for test_label in test_labels]
+
+    train_y = [np.fromstring(train_label, dtype=int, sep=' ') for train_label in train_labels]
+    test_y = [np.fromstring(test_label, dtype=int, sep=' ') for test_label in test_labels]
+
+    for feature in train_features:
+        new_feature = np.concatenate([feature,np.zeros((max_len-len(feature),1024),dtype=float)])
+        train_features_padded.append(np.transpose(new_feature))
+
+    for feature in test_features:
+        new_feature = np.concatenate([feature,np.zeros((max_len - len(feature),1024),dtype=float)])
+        test_features_padded.append(np.transpose(new_feature))
+
+    train_dataset = Seq_Dataset(features=train_features_padded, targets = train_y, seq_lens = train_chain_lengths)
+    test_dataset = Seq_Dataset(features=test_features_padded, targets = test_y, seq_lens = test_chain_lengths)    
+
+
+
+
+def prepare_res_features(data_folder, feature_folder, pad_len):
     with open(feature_folder + "train_feature_all.pkl", "rb") as fp:
         train_features = pkl.load(fp)
 
@@ -56,47 +112,31 @@ def prepare_res_features(data_folder, feature_folder):
     train_features_padded = []
     test_features_padded = []
     for feature in train_features:
-        new_feature = np.concatenate([np.zeros((15,1024),dtype=float),feature,np.zeros((15,1024),dtype=float)])
+        new_feature = np.concatenate([np.zeros((pad_len,1024),dtype=float),feature,np.zeros((pad_len,1024),dtype=float)])
         train_features_padded.append((new_feature))
 
     for feature in test_features:
-        new_feature = np.concatenate([np.zeros((15,1024),dtype=float),feature,np.zeros((15,1024),dtype=float)])
+        new_feature = np.concatenate([np.zeros((pad_len,1024),dtype=float),feature,np.zeros((pad_len,1024),dtype=float)])
         test_features_padded.append((new_feature))
-
-    # train_x = np.concatenate(train_features)
-    # test_x = np.concatenate(test_features)
-
-
-    print(len(train_features_padded))
-    print(len(test_features_padded))
-
-    with open(data_folder + "test_labels.pkl", "rb") as fp:
-        test_labels = pkl.load( fp)
-    with open(data_folder + "train_labels.pkl", "rb") as fp:
-        train_labels = pkl.load(fp)
-
-    # print(train_labels)
 
     train_labels = [" ".join(train_label) for train_label in train_labels]
     test_labels = [" ".join(test_label) for test_label in test_labels]
-
-    # print(train_labels)
 
     train_y = [np.fromstring(train_label, dtype=int, sep=' ') for train_label in train_labels]
     test_y = [np.fromstring(test_label, dtype=int, sep=' ') for test_label in test_labels]
 
     train_data_res = []
     for chain in train_features_padded:
-        for residue_idx in range(15,len(chain) - 15):
-            residue_feature = chain[(residue_idx - 15): (residue_idx + 16),:]
+        for residue_idx in range(pad_len,len(chain) - pad_len):
+            residue_feature = chain[(residue_idx - pad_len): (residue_idx + pad_len + 1),:]
             train_data_res.append(np.transpose(residue_feature))
         # print(len(chain)-30)
     print(len(train_data_res))
 
     test_data_res = []
     for chain in test_features_padded:
-        for residue_idx in range(15,len(chain) - 15):
-            residue_feature = chain[(residue_idx - 15): (residue_idx + 16),:]
+        for residue_idx in range(pad_len,len(chain) - pad_len):
+            residue_feature = chain[(residue_idx - pad_len): (residue_idx + pad_len + 1),:]
             test_data_res.append(np.transpose(residue_feature))
 
     train_y_cat = np.concatenate(train_y)
@@ -104,7 +144,10 @@ def prepare_res_features(data_folder, feature_folder):
     test_y_cat = np.concatenate(test_y)
     test_y = test_y_cat.tolist()
 
-    return train_data_res, train_y
+    train_dataset = Res_Dataset(features = train_data_res, targets = train_y)
+    test_dataset = Res_Dataset(features = test_data_res, targets = test_y)
+    train_subsets = prepare_subsets(train_data_res, train_y, 10)
+    return train_dataset, test_dataset, train_subsets
 
 def prepare_subsets(train_data_res, train_y, sample_reps):
     
@@ -115,8 +158,7 @@ def prepare_subsets(train_data_res, train_y, sample_reps):
     print("Negative sampels: ", len(train_x_neg))
     # train_x_pos[]
     
-    train_x_subsets = []
-    train_y_subsets = []
+    train_subsets = []
     for i in range(sample_reps):
         x_subset = train_x_pos[:]
         subset_idx = random.sample(range(0,len(train_x_neg)), int(0.2*len(train_x_neg)))
@@ -133,24 +175,29 @@ def prepare_subsets(train_data_res, train_y, sample_reps):
         x_subset, y_subset = zip(*tmp)
         x_subset, y_subset = list(x_subset), list(y_subset)
 
-        train_x_subsets.append(x_subset)
-        train_y_subsets.append(y_subset)
+        data = Res_Dataset(features = x_subset, targets = y_subset)
+        train_subsets.append(data)
+        # train_x_subsets.append(x_subset)
+        # train_y_subsets.append(y_subset)
 
-        return train_x_subsets, train_y_subsets
 
-def train_subset(X_train, y_train, X_val, y_val, model, opt, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=20):
-    # EPOCHS = 20
-    # trainSteps = 256
-    # valSteps = 128
+    return train_subsets
+
+def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=20):
     H = history
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model.to(device)
+    train_size = len(data)*.8
+    val_size = len(data) - train_size
+    train_data, val_data = random_split(data, [train_size, val_size])
+    train_dataloader = DataLoader(train_data, batch_size = trainSteps, shuffle = True)
+    val_dataloader = DataLoader(val_data, batch_size = valSteps, shuffle = True)
+    # train_data_loader = 
     # loop over our epochs
     for e in range(0, EPOCHS):
         print("On Epoch = ",e)
         # set the model in training mode
         model.train()
-        # print(model.init_conv1.weight)
         # initialize the total training and validation loss
         totalTrainLoss = 0
         totalValLoss = 0
@@ -160,66 +207,38 @@ def train_subset(X_train, y_train, X_val, y_val, model, opt, lossFn, history, tr
         valCorrect = 0
         # loop over the training set
         # for (x, y) in zip(X_train, y_train):
-        for batch_idx in range(0, len(X_train), trainSteps): 
-            # send the input to the device
-            batch_start = batch_idx
-            batch_end = min(batch_start + trainSteps, len(X_train))
-
-            
-            x_cat = np.stack(X_train[batch_start : batch_end])
-            y_cat = np.stack(y_train[batch_start : batch_end])
-            x = torch.Tensor( x_cat )
-            y = torch.Tensor( y_cat )
-            cur_batch_size = batch_end - batch_start
-            x = np.reshape(x, (cur_batch_size, x_cat.shape[1], x_cat.shape[2]))
+        for batch_idx, (x, y) in enumerate(train_dataloader):
             (x, y) = (x.to(device), y.to(device))
-            # perform a forward pass and calculate the training loss
             pred = torch.sigmoid(model(x))
-            # pred = torch.round(pred)
-            pred = pred.reshape([cur_batch_size])
-            # print(type(pred), type(y))
-            # print(pred.shape, y.shape)
-            # print(pred)
-            # print(y)
-
-            # print((pred.argmax(1) == y))
-            # print(pred.get_device(), y.get_device())
+            pred = pred.reshape([train_steps])
             loss = lossFn(pred, y)
             # zero out the gradients, perform the backpropagation step,
             # and update the weights
             opt.zero_grad()
             loss.backward()
             opt.step()
-            # add the loss to the total training loss so far and
-            # calculate the number of correct predictions
+
+            pred = (pred>0.5).float()
             totalTrainLoss += loss
-            trainCorrect += (pred.argmax(0) == y).type(
-                torch.float).sum().item()
+            trainCorrect += (np.array(pred) == np.array(y)).astype(int).sum()
         
             # switch off autograd for evaluation
-        with torch.no_grad():
-            # set the model in evaluation mode
-            model.eval()
-            # loop over the validation set
-            for batch_idx in range(0, len(X_val), valSteps):
-                batch_start = batch_idx
-                batch_end = min(batch_start + valSteps, len(X_val))
-                x_cat = np.stack( X_val[batch_start : batch_end] )
-                y_cat = np.stack( y_val[batch_start : batch_end] )
-                x = torch.Tensor( x_cat )
-                y = torch.Tensor( y_cat )
-                cur_batch_size = batch_end - batch_start
-                # send the input to the device
-                x = np.reshape(x, ( cur_batch_size, x_cat.shape[1], x_cat.shape[2]))
-                (x, y) = (x.to(device), y.to(device))
-                # make the predictions and calculate the validation loss
-                pred = torch.sigmoid(model(x))
-                # pred = torch.round(pred)
-                pred = pred.reshape([cur_batch_size])
-                totalValLoss += lossFn(pred, y)
-                # calculate the number of correct predictions
-                valCorrect += (pred.argmax(0) == y).type(
-                    torch.float).sum().item()
+            with torch.no_grad():
+                # set the model in evaluation mode
+                model.eval()
+                # loop over the validation set
+                for batch_idx, (x,y) in enumerate(val_dataloader):
+                    (x, y) = (x.to(device), y.to(device))
+                    pred = torch.sigmoid(model(x))
+                    pred = pred.reshape([train_steps])
+                    loss = lossFn(pred, y)
+                    pred = pred.reshape([valSteps])
+                    
+                    
+                    pred = (pred > 0.5).astype(float)
+                    totalValLoss += loss
+                    # calculate the number of correct predictions
+                    valCorrect += (np.array(pred) == np.array(y)).astype(int).sum()
         
         # calculate the average training and validation loss
         avgTrainLoss = totalTrainLoss / trainSteps
@@ -244,10 +263,7 @@ def main():
     feature_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Features/"
 
     print("Preparing residue level features .. ...")
-    train_data_res, train_y = prepare_res_features(data_folder, feature_folder)
-
-    print("Preparing subsets by undersampling ... ...")
-    train_x_subsets, train_y_subsets = prepare_subsets(train_data_res, train_y, 10)
+    train_dataset, test_dataset, train_subsets = prepare_res_features(data_folder, feature_folder, 15)
 
     H = {
     "train_loss": [],
@@ -259,15 +275,15 @@ def main():
     # measure how long training is going to take
     print("[INFO] training the network...")
     startTime = time.time()
-    X_train, X_val, y_train, y_val = train_test_split(train_x_subsets[0] , train_y_subsets[0],
-                                                        stratify=train_y_subsets[0], 
-                                                        test_size=0.2, random_state= 10)
-    print(len(X_train), len(y_train))
+    # X_train, X_val, y_train, y_val = train_test_split(train_x_subsets[0] , train_y_subsets[0],
+    #                                                     stratify=train_y_subsets[0], 
+    #                                                     test_size=0.2, random_state= 10)
+    # print(len(X_train), len(y_train))
     model = CNN2Layers(1024, 64, 5, 1, 2, 0.1,128)
     # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
     optim = Adam(model.parameters(), lr=1e-4)
     lossFn = BCEWithLogitsLoss()
-    train_subset(X_train, y_train, X_val, y_val, model, optim, lossFn, H)
+    train_subset(train_subsets[0], model, optim, lossFn, H)
 
     endTime = time.time()
     
