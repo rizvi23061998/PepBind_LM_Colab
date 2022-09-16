@@ -30,8 +30,8 @@ class Res_Dataset(torch.utils.data.Dataset):
         return len(self.features)
 
     def __getitem__(self, idx):
-        x = torch.tensor(self.features[idx])
-        y = torch.tensor(self.targets[idx])
+        x = torch.tensor(self.features[idx], dtype=torch.float64)
+        y = torch.tensor(self.targets[idx], dtype=torch.float64)
         # seq_len = self.seq_lens[idx]
 
         return x, y
