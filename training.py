@@ -183,7 +183,7 @@ def prepare_subsets(train_data_res, train_y, sample_reps):
 
     return train_subsets
 
-def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=20):
+def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=50):
     H = history
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model.to(device)
@@ -282,7 +282,7 @@ def main():
     # print(len(X_train), len(y_train))
     model = CNN2Layers(1024, 64, 5, 1, 2, 0.1,128)
     # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
-    optim = Adam(model.parameters(), lr=1e-4)
+    optim = Adam(model.parameters(), lr=1e-3)
     lossFn = BCEWithLogitsLoss()
     train_subset(train_subsets[0], model, optim, lossFn, H)
 
