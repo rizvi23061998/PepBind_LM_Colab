@@ -245,8 +245,8 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
         avgTrainLoss = totalTrainLoss / trainSteps
         avgValLoss = totalValLoss / valSteps
         # calculate the training and validation accuracy
-        trainCorrect = trainCorrect / len(X_train)
-        valCorrect = valCorrect / len(X_val)
+        trainCorrect = trainCorrect / train_size
+        valCorrect = valCorrect / val_size
         # update our training history
         H["train_loss"].append(avgTrainLoss.cpu().detach().numpy())
         H["train_acc"].append(trainCorrect)
