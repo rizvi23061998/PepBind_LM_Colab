@@ -272,7 +272,7 @@ def main():
     "val_loss": [],
     "val_acc": []
     }
-
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # measure how long training is going to take
     print("[INFO] training the network...")
     startTime = time.time()
@@ -283,7 +283,8 @@ def main():
     model = CNN2Layers(1024, 128, 5, 1, 2, 0.5, 256)
     # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
     optim = Adam(model.parameters(), lr=1e-3)
-    lossFn = BCEWithLogitsLoss(pos_weight=3)
+    pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
+    lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
     train_subset(train_subsets[0], model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 30)
 
     endTime = time.time()
