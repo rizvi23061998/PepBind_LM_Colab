@@ -209,6 +209,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
         # for (x, y) in zip(X_train, y_train):
         for batch_idx, (x, y) in enumerate(train_dataloader):
             (x, y) = (x.to(device), y.to(device))
+            print(x.type())
             pred = torch.sigmoid(model(x))
             pred = pred.reshape([train_steps])
             loss = lossFn(pred, y)
