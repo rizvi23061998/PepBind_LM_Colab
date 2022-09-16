@@ -234,7 +234,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
                     pred = pred.reshape([valSteps])
                     loss = lossFn(pred, y)                    
                     
-                    pred = (pred > 0.5).astype(float)
+                    pred = (pred > 0.5).float()
                     totalValLoss += loss
                     # calculate the number of correct predictions
                     valCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
