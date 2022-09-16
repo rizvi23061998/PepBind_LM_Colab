@@ -225,21 +225,21 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
             totalTrainLoss += loss
             trainCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
         
-            # switch off autograd for evaluation
-            with torch.no_grad():
-                # set the model in evaluation mode
-                model.eval()
-                # loop over the validation set
-                for batch_idx, (x,y) in enumerate(val_dataloader):
-                    (x, y) = (x.to(device), y.to(device))
-                    pred = torch.sigmoid(model(x))
-                    pred = pred.reshape([valSteps])
-                    loss = lossFn(pred, y)                    
-                    
-                    pred = (pred > 0.5).float()
-                    totalValLoss += loss
-                    # calculate the number of correct predictions
-                    valCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
+        # switch off autograd for evaluation
+        with torch.no_grad():
+            # set the model in evaluation mode
+            model.eval()
+            # loop over the validation set
+            for batch_idx, (x,y) in enumerate(val_dataloader):
+                (x, y) = (x.to(device), y.to(device))
+                pred = torch.sigmoid(model(x))
+                pred = pred.reshape([valSteps])
+                loss = lossFn(pred, y)                    
+                
+                pred = (pred > 0.5).float()
+                totalValLoss += loss
+                # calculate the number of correct predictions
+                valCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
         
         # calculate the average training and validation loss
         avgTrainLoss = totalTrainLoss / trainSteps
