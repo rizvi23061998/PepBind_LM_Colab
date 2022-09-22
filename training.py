@@ -62,7 +62,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
         loss.backward()
         opt.step()
         # print(type(pred))
-        all_preds = np.concatenate( (all_preds, pred.detach().numpy()) )
+        all_preds = np.concatenate( (all_preds, pred.cpu().detach().numpy()) )
         pred = (pred>0.5).float()
         totalTrainLoss += loss
         trainCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
@@ -85,7 +85,7 @@ def validate(model, val_dataloader, lossFn, valSteps):
             pred = pred.reshape([valSteps])
             loss = lossFn(pred, y)                    
             
-            all_preds = np.concatenate( (all_preds, pred.detach().numpy() ) )
+            all_preds = np.concatenate( (all_preds, pred.cpu().detach().numpy() ) )
             pred = (pred > 0.5).float()
             totalValLoss += loss
             # calculate the number of correct predictions
