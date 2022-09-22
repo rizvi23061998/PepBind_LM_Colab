@@ -48,6 +48,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
     # and validation step
     trainCorrect = 0
     all_preds = np.array([])
+    targets = np.array([])
     # loop over the training set
     # for (x, y) in zip(X_train, y_train):
     for batch_idx, (x, y) in enumerate(train_dataloader):
@@ -63,11 +64,12 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
         opt.step()
         # print(type(pred))
         all_preds = np.concatenate( (all_preds, pred.cpu().detach().numpy()) )
+        targets = np.concatenate( (targets, y.cpu().detach().numpy()) )
         pred = (pred>0.5).float()
         totalTrainLoss += loss
         trainCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
     
-    return totalTrainLoss, trainCorrect, all_preds
+    return totalTrainLoss, trainCorrect, all_preds, targets
 
 
 def validate(model, val_dataloader, lossFn, valSteps):
@@ -75,6 +77,7 @@ def validate(model, val_dataloader, lossFn, valSteps):
     totalValLoss = 0
     valCorrect = 0
     all_preds = np.array([])    
+    targets = np.array([])
     with torch.no_grad():
         # set the model in evaluation mode
         model.eval()
@@ -86,11 +89,13 @@ def validate(model, val_dataloader, lossFn, valSteps):
             loss = lossFn(pred, y)                    
             
             all_preds = np.concatenate( (all_preds, pred.cpu().detach().numpy() ) )
+            targets = np.concatenate( (targets, y.cpu().detach().numpy()) )
+
             pred = (pred > 0.5).float()
             totalValLoss += loss
             # calculate the number of correct predictions
             valCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
-    return totalValLoss, valCorrect, all_preds
+    return totalValLoss, valCorrect, all_preds, targets
 
 def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=50):
     H = history
@@ -109,10 +114,10 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     # loop over our epochs
     for e in range(0, EPOCHS):
         print("On Epoch = ",e)
-        totalTrainLoss, trainCorrect, train_preds = train(model=model, train_dataloader=train_dataloader,
+        totalTrainLoss, trainCorrect, train_preds, train_targets = train(model=model, train_dataloader=train_dataloader,
                                          opt = opt, lossFn=lossFn, trainSteps=trainSteps)
         # switch off autograd for evaluation
-        totalValLoss, valCorrect, val_preds = validate(model, val_dataloader, lossFn, valSteps)
+        totalValLoss, valCorrect, val_preds, val_targets = validate(model, val_dataloader, lossFn, valSteps)
         # calculate the average training and validation loss
         avgTrainLoss = totalTrainLoss / trainSteps
         avgValLoss = totalValLoss / valSteps
@@ -121,10 +126,10 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
         valCorrect = valCorrect / val_size
         #calculate f1_score and mcc
         f1_train = f1_score(train_preds, train_data.get_targets())
-        mcc_train = matthews_corrcoef(train_preds, train_data.get_targets())
+        mcc_train = matthews_corrcoef(train_preds, train_targets)
 
         f1_val = f1_score(val_preds, val_data.get_targets())
-        mcc_val = matthews_corrcoef(val_preds, val_data.get_targets())
+        mcc_val = matthews_corrcoef(val_preds, val_targets)
         # update our training history
         H["train_loss"].append(avgTrainLoss.cpu().detach().numpy())
         H["train_acc"].append(trainCorrect)
