@@ -39,6 +39,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 def train(model, train_dataloader, opt, lossFn, trainSteps):
     # set the model in training mode
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model.train()
     # initialize the total training and validation loss
     totalTrainLoss = 0
@@ -70,6 +71,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
 
 
 def validate(model, val_dataloader, lossFn, valSteps):
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     totalValLoss = 0
     valCorrect = 0
     all_preds = np.array([])    
