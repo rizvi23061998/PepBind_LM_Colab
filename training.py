@@ -47,8 +47,8 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
     # initialize the number of correct predictions in the training
     # and validation step
     trainCorrect = 0
-    all_preds = np.array([])
-    targets = np.array([])
+    all_preds = torch.tensor([])
+    targets = torch.tensor([])
     # loop over the training set
     # for (x, y) in zip(X_train, y_train):
     for batch_idx, (x, y) in enumerate(train_dataloader):
@@ -63,8 +63,8 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
         loss.backward()
         opt.step()
         # print(type(pred))
-        all_preds = np.concatenate( (all_preds, pred.cpu().detach()) )
-        targets = np.concatenate( (targets, y.cpu().detach()) )
+        all_preds = torch.cat( (all_preds, pred.cpu().detach()) )
+        targets = torch.cat( (targets, y.cpu().detach()) )
         pred = (pred>0.5).float()
         totalTrainLoss += loss
         trainCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
@@ -76,8 +76,8 @@ def validate(model, val_dataloader, lossFn, valSteps):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     totalValLoss = 0
     valCorrect = 0
-    all_preds = np.array([])    
-    targets = np.array([])
+    all_preds = torch.tensor([])
+    targets = torch.tensor([])
     with torch.no_grad():
         # set the model in evaluation mode
         model.eval()
@@ -88,8 +88,8 @@ def validate(model, val_dataloader, lossFn, valSteps):
             pred = pred.reshape([valSteps])
             loss = lossFn(pred, y)                    
             
-            all_preds = np.concatenate( (all_preds, pred.cpu().detach()) )
-            targets = np.concatenate( (targets, y.cpu().detach()) )
+            all_preds = torch.cat( (all_preds, pred.cpu().detach()) )
+            targets = torch.cat( (targets, y.cpu().detach()) )
 
             pred = (pred > 0.5).float()
             totalValLoss += loss
