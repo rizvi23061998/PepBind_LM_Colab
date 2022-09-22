@@ -64,7 +64,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
         opt.step()
         # print(type(pred))
         all_preds = torch.cat( (all_preds, pred.cpu().detach()) )
-        targets = torch.cat( (targets, y.cpu().detach()) )
+        targets = torch.cat( (targets, y.cpu().detach().int()) )
         pred = (pred>0.5).float()
         totalTrainLoss += loss
         trainCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
@@ -90,7 +90,7 @@ def validate(model, val_dataloader, lossFn, valSteps):
             loss = lossFn(pred, y)                    
             
             all_preds = torch.cat( (all_preds, pred.cpu().detach()) )
-            targets = torch.cat( (targets, y.cpu().detach()) )
+            targets = torch.cat( (targets, y.cpu().detach().int()) )
 
             pred = (pred > 0.5).float()
             totalValLoss += loss
