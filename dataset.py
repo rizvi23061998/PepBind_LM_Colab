@@ -18,7 +18,9 @@ class Seq_Dataset(torch.utils.data.Dataset):
         seq_len = self.seq_lens[idx]
 
         return x, y, seq_len
-
+    
+    def get_targets(self):
+        return self.targets
 
 class Res_Dataset(torch.utils.data.Dataset):
     def __init__(self, features, targets):
@@ -35,3 +37,6 @@ class Res_Dataset(torch.utils.data.Dataset):
         # seq_len = self.seq_lens[idx]
 
         return x, y
+    
+    def get_targets(self):
+        return self.targets
