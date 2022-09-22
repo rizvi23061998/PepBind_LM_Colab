@@ -30,7 +30,7 @@ from torchsummary import summary
 from torchmetrics.functional import f1_score,matthews_corrcoef
 from dataset import Seq_Dataset
 from dataset import Res_Dataset
-from train_utils import prepare_res_features, prepare_subsets, prepare_seq_features
+# from train_utils import prepare_res_features, prepare_subsets, prepare_seq_features
 import time
 import random
 # import 
