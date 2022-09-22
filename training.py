@@ -125,10 +125,10 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
         trainCorrect = trainCorrect / train_size
         valCorrect = valCorrect / val_size
         #calculate f1_score and mcc
-        f1_train = f1_score(train_preds, train_data.get_targets())
+        f1_train = f1_score(train_preds, train_targets)
         mcc_train = matthews_corrcoef(train_preds, train_targets)
 
-        f1_val = f1_score(val_preds, val_data.get_targets())
+        f1_val = f1_score(val_preds, val_targets)
         mcc_val = matthews_corrcoef(val_preds, val_targets)
         # update our training history
         H["train_loss"].append(avgTrainLoss.cpu().detach().numpy())
