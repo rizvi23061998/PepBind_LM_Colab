@@ -48,7 +48,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
     # and validation step
     trainCorrect = 0
     all_preds = torch.tensor([])
-    targets = torch.tensor([])
+    targets = torch.tensor([], dtype=int)
     # loop over the training set
     # for (x, y) in zip(X_train, y_train):
     for batch_idx, (x, y) in enumerate(train_dataloader):
@@ -77,7 +77,8 @@ def validate(model, val_dataloader, lossFn, valSteps):
     totalValLoss = 0
     valCorrect = 0
     all_preds = torch.tensor([])
-    targets = torch.tensor([])
+    targets = torch.tensor([], dtype=int)
+
     with torch.no_grad():
         # set the model in evaluation mode
         model.eval()
