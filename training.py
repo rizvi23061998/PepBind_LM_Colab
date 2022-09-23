@@ -111,7 +111,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     val_dataloader = DataLoader(val_data, batch_size = valSteps, shuffle = True, drop_last=True)
     
     scheduler = ReduceLROnPlateau(opt, 'min', patience = 3)
-    early_stopping = EarlyStopping(min_delta=1e-8, patience=8)
+    early_stopping = EarlyStopping(min_delta=1e-8, patience=6)
     best_model = None
     best_mcc = -1
     best_f1 = -1
