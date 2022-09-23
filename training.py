@@ -163,8 +163,10 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
 def main():
     torch.manual_seed(10)
 
-    data_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Data/"
-    feature_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Features/"
+    root_folder = "/content/drive/MyDrive/Masters/"
+    # root_folder = "/content/drive/MyDrive/"
+    data_folder = root_folder + "PepBind_LM/Data/"
+    feature_folder = root_folder + "PepBind_LM/Features/"
 
     print("Preparing residue level features .. ...")
     train_dataset, test_dataset, train_samples = prepare_res_features(data_folder, feature_folder, 15)
@@ -188,7 +190,7 @@ def main():
     optim = Adam(model.parameters(), lr=1e-3)
     pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
     lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
-    model_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Model/"
+    model_folder = root_folder + "PepBind_LM/Model/"
     subset_model_list = []
     count = 0
     for sample_i in train_samples:
