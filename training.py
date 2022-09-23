@@ -161,7 +161,7 @@ def main():
     feature_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Features/"
 
     print("Preparing residue level features .. ...")
-    train_dataset, test_dataset, train_subsets = prepare_res_features(data_folder, feature_folder, 15)
+    train_dataset, test_dataset, train_samples = prepare_res_features(data_folder, feature_folder, 15)
 
     H = {
     "train_loss": [],
@@ -184,7 +184,7 @@ def main():
     lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
 
     subset_model_list = []
-    for sample_i in data_samples:
+    for sample_i in train_samples:
         subset_model = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 30)
         subset_model.append(subset_model_list)
     
