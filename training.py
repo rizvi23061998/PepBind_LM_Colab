@@ -186,7 +186,7 @@ def main():
     subset_model_list = []
     for sample_i in train_samples:
         subset_model = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 50)
-        subset_model.append(subset_model_list)
+        subset_model_list.append(subset_model)
     
     endTime = time.time()
     model_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Model/"
