@@ -111,7 +111,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     val_dataloader = DataLoader(val_data, batch_size = valSteps, shuffle = True, drop_last=True)
     
     scheduler = ReduceLROnPlateau(opt, 'min', patience = 3)
-    early_stopping = EarlyStopping(min_delta=1e-8)
+    early_stopping = EarlyStopping(min_delta=1e-8, patience=8)
     best_model = None
     best_mcc = -1
     # train_data_loader = 
@@ -157,6 +157,8 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     return best_model
 
 def main():
+    torch.manual_seed(10)
+
     data_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Data/"
     feature_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Features/"
 
