@@ -185,7 +185,7 @@ def main():
 
     subset_model_list = []
     for sample_i in train_samples:
-        subset_model = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 30)
+        subset_model = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 50)
         subset_model.append(subset_model_list)
     
     endTime = time.time()
