@@ -201,7 +201,7 @@ def main():
         count += 1
         print("===========Model {} training finished ========== \n", format(count))
         print("MCC: ", mcc, ", F1: ", f1)
-        with open(model_folder + 'subset_models_'+count + '.pkl', 'wb') as handle:
+        with open(model_folder + 'subset_models_'+ str(count) + '.pkl', 'wb') as handle:
             pkl.dump(subset_model, handle)
 
 
