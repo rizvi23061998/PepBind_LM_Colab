@@ -114,6 +114,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     early_stopping = EarlyStopping(min_delta=1e-8, patience=8)
     best_model = None
     best_mcc = -1
+    best_f1 = -1
     # train_data_loader = 
     # loop over our epochs
     for e in range(0, EPOCHS):
@@ -140,21 +141,24 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
         H["val_loss"].append(avgValLoss.cpu().detach().numpy())
         H["val_acc"].append(valCorrect)
         # print the model training and validation information
-        print("[INFO] EPOCH: {}/{}".format(e + 1, EPOCHS))
-        print("Train loss: {:.6f}, Train accuracy: {:.4f}, F1: {:.4f}, MCC: {:.4f}\n".format(
-            avgTrainLoss, trainCorrect, f1_train, mcc_train))
-        print("Val loss: {:.6f}, Val accuracy: {:.4f}, F1: {:.4f}, MCC: {:.4f}\n".format(
-            avgValLoss, valCorrect, f1_val, mcc_val))
+        if e % 10 == 0:
+            print("[INFO] EPOCH: {}/{}".format(e + 1, EPOCHS))
+            print("Train loss: {:.6f}, Train accuracy: {:.4f}, F1: {:.4f}, MCC: {:.4f}\n".format(
+                avgTrainLoss, trainCorrect, f1_train, mcc_train))
+            print("Val loss: {:.6f}, Val accuracy: {:.4f}, F1: {:.4f}, MCC: {:.4f}\n".format(
+                avgValLoss, valCorrect, f1_val, mcc_val))
 
         if mcc_val>best_mcc or best_model == None:
             best_mcc = mcc_val
             best_model = copy.deepcopy(model)
-        
+            best_f1 = f1_val
+
         scheduler.step(totalValLoss)
         early_stopping(totalValLoss)
         if early_stopping.early_stop:
             break
-    return best_model
+
+    return best_model, best_mcc, best_f1
 
 def main():
     torch.manual_seed(10)
@@ -184,16 +188,23 @@ def main():
     optim = Adam(model.parameters(), lr=1e-3)
     pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
     lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
-
+    model_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Model/"
     subset_model_list = []
+    count = 0
     for sample_i in train_samples:
         model = CNN2Layers(1024, 128, 5, 1, 2, 0.5, 256)
         optim = Adam(model.parameters(), lr=1e-3)
-        subset_model = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 50)
+        subset_model, mcc, f1 = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 50)
         subset_model_list.append(subset_model)
-    
+        count += 1
+        print("===========Model {} training finished ========== \n", format(count))
+        print("MCC: ", mcc, ", F1: ", f1)
+        with open(model_folder + 'subset_models_'+count + '.pkl', 'wb') as handle:
+            pkl.dump(subset_model, handle)
+
+
     endTime = time.time()
-    model_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Model/"
+    
     with open(model_folder + 'subset_models.pkl', 'wb') as handle:
       pkl.dump(subset_model_list, handle)
 
