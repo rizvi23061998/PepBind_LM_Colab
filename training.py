@@ -184,8 +184,8 @@ def main():
     lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
 
     subset_model_list = []
-    for train_subset in train_subsets:
-        subset_model = train_subset(train_subset, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 30)
+    for sample_i in data_samples:
+        subset_model = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 30)
         subset_model.append(subset_model_list)
     
     endTime = time.time()
