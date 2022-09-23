@@ -30,7 +30,7 @@ from torchsummary import summary
 from torchmetrics.functional import f1_score,matthews_corrcoef
 from dataset import Seq_Dataset
 from dataset import Res_Dataset
-from train_utils import prepare_res_features, prepare_subsets, prepare_seq_features
+from train_utils import prepare_res_features, prepare_subsets, prepare_seq_features, EarlyStopping
 import time
 import random
 # import 
@@ -110,7 +110,10 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     train_dataloader = DataLoader(train_data, batch_size = trainSteps, shuffle = True, drop_last=True)
     val_dataloader = DataLoader(val_data, batch_size = valSteps, shuffle = True, drop_last=True)
     
-    scheduler = ReduceLROnPlateau(opt, 'min')
+    scheduler = ReduceLROnPlateau(opt, 'min', patience = 3)
+    early_stopping = EarlyStopping(min_delta=1e-8)
+    best_model = None
+    best_mcc = -1
     # train_data_loader = 
     # loop over our epochs
     for e in range(0, EPOCHS):
@@ -143,7 +146,15 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
         print("Val loss: {:.6f}, Val accuracy: {:.4f}, F1: {:.4f}, MCC: {:.4f}\n".format(
             avgValLoss, valCorrect, f1_val, mcc_val))
 
+        if mcc_val>best_mcc or best_model == None:
+            best_mcc = mcc_val
+            best_model = copy.deepcopy(model)
+        
         scheduler.step(totalValLoss)
+        early_stopping(totalValLoss)
+        if early_stopping.early_stop:
+            break
+    return best_model
 
 def main():
     data_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Data/"
@@ -171,10 +182,16 @@ def main():
     optim = Adam(model.parameters(), lr=1e-3)
     pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
     lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
-    train_subset(train_subsets[0], model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 30)
 
-    endTime = time.time()
+    subset_model_list = []
+    for train_subset in train_subsets:
+        subset_model = train_subset(train_subset, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 30)
+        subset_model.append(subset_model_list)
     
+    endTime = time.time()
+    model_folder = "/content/drive/MyDrive/Masters/PepBind_LM/Model/"
+    with open(model_folder + 'subset_models.pkl', 'wb') as handle:
+      pkl.dump(subset_model_list, handle)
 
 if __name__ == "__main__":
     main()
