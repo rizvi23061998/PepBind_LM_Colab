@@ -35,11 +35,11 @@ class CNN2Layers(torch.nn.Module):
 class Logistic_Reg_model(torch.nn.Module):
     def __init__(self,no_input_features=10 ):
         super(Logistic_Reg_model,self).__init__()
-        self.layer1=torch.nn.Linear(no_input_features,20)
-        self.layer2=torch.nn.Linear(20,1)
+        self.layer1=torch.nn.Linear(no_input_features,64)
+        self.layer2=torch.nn.Linear(64,1)
         # self.subset_models = subset_models
     def forward(self,x):
-        print(x.shape)
+        # print(x.shape)
         y_predicted=self.layer1(x)
         y_predicted=torch.sigmoid(self.layer2(y_predicted))
         return y_predicted
