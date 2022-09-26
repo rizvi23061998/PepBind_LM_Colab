@@ -58,7 +58,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps, subset_models=None):
         (x, y) = (x.to(device), y.to(device))
         if subset_models != None:
             intermediate_out = torch.tensor([])
-            intermediate_out.to(device)
+            intermediate_out = intermediate_out.to(device)
             with torch.no_grad():
                 
                 for subset_model in subset_models:
@@ -100,7 +100,7 @@ def validate(model, val_dataloader, lossFn, valSteps, subset_models=None):
             (x, y) = (x.to(device), y.to(device))
             if subset_models != None:
                 intermediate_out = torch.tensor([])
-                intermediate_out.to(device)
+                intermediate_out = intermediate_out.to(device)
                 with torch.no_grad():                
                     for subset_model in subset_models:
                         out_i = torch.sigmoid(subset_model(x))
