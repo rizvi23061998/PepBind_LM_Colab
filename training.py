@@ -193,6 +193,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_sub', type=int, default=0)
+    parser.add_argument('--pos_weight', type=int, default=16)
     args = parser.parse_args()
 
 
@@ -247,7 +248,7 @@ def main():
         model = Logistic_Reg_model(no_input_features=10)
         # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
         optim = Adam(model.parameters(), lr=1e-3)
-        pos_weight = torch.tensor(np.array([16]), dtype=float).to(device)
+        pos_weight = torch.tensor(np.array([args.pos_weight]), dtype=float).to(device)
         lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
         
         ensemble_model, mcc, f1 = train_subset(train_dataset, model, optim, lossFn, H, trainSteps= 512, valSteps= 256,EPOCHS= 50, subset_models=subset_model_list)
