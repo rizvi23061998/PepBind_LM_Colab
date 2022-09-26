@@ -41,5 +41,5 @@ class Logistic_Reg_model(torch.nn.Module):
     def forward(self,x):
         # print(x.shape)
         y_predicted=self.layer1(x)
-        y_predicted=torch.sigmoid(self.layer2(y_predicted))
+        y_predicted=(self.layer2(y_predicted))
         return y_predicted
