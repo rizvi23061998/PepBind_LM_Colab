@@ -39,6 +39,7 @@ class Logistic_Reg_model(torch.nn.Module):
         self.layer2=torch.nn.Linear(20,1)
         # self.subset_models = subset_models
     def forward(self,x):
+        print(x.shape)
         y_predicted=self.layer1(x)
         y_predicted=torch.sigmoid(self.layer2(y_predicted))
         return y_predicted
