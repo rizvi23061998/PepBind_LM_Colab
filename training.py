@@ -1,3 +1,4 @@
+import argparse
 import os 
 import numpy as np
 import pandas as pd 
@@ -25,7 +26,7 @@ from torch import flatten
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, NLLLoss
 from torch.utils.data import random_split, DataLoader 
-from cnn_models import CNN2Layers
+from cnn_models import CNN2Layers, Logistic_Reg_model
 from torchsummary import summary
 from torchmetrics.functional import f1_score,matthews_corrcoef
 from dataset import Seq_Dataset
@@ -37,13 +38,15 @@ import random
 import gc
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-def train(model, train_dataloader, opt, lossFn, trainSteps):
+def train(model, train_dataloader, opt, lossFn, trainSteps, subset_models=None):
     # set the model in training mode
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model.train()
     # initialize the total training and validation loss
     totalTrainLoss = 0
-    
+    if subset_models != None:
+        for subset_model in subset_models:
+            subset_model.eval()
     # initialize the number of correct predictions in the training
     # and validation step
     trainCorrect = 0
@@ -53,8 +56,17 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
     # for (x, y) in zip(X_train, y_train):
     for batch_idx, (x, y) in enumerate(train_dataloader):
         (x, y) = (x.to(device), y.to(device))
-        # print(x.type())
-        pred = torch.sigmoid(model(x))
+        if subset_models != None:
+            intermediate_out = torch.tensor([])
+            with torch.no_grad():
+                
+                for subset_model in subset_models:
+                    out_i = torch.sigmoid(subset_model(x))
+                    intermediate_out = torch.cat((intermediate_out,out_i), axis = 0)
+        else:
+            intermediate_out = x
+
+        pred = torch.sigmoid(model(intermediate_out))
         pred = pred.reshape([trainSteps])
         loss = lossFn(pred, y)
         # zero out the gradients, perform the backpropagation step,
@@ -72,7 +84,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps):
     return totalTrainLoss, trainCorrect, all_preds, targets
 
 
-def validate(model, val_dataloader, lossFn, valSteps):
+def validate(model, val_dataloader, lossFn, valSteps, subset_models=None):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     totalValLoss = 0
     valCorrect = 0
@@ -85,7 +97,17 @@ def validate(model, val_dataloader, lossFn, valSteps):
         # loop over the validation set
         for batch_idx, (x,y) in enumerate(val_dataloader):
             (x, y) = (x.to(device), y.to(device))
-            pred = torch.sigmoid(model(x))
+            if subset_models != None:
+                intermediate_out = torch.tensor([])
+                with torch.no_grad():                
+                    for subset_model in subset_models:
+                        out_i = torch.sigmoid(subset_model(x))
+                        intermediate_out = torch.cat((intermediate_out,out_i), axis = 0)
+            else:
+                intermediate_out = x
+
+            
+            pred = torch.sigmoid(model(intermediate_out))
             pred = pred.reshape([valSteps])
             loss = lossFn(pred, y)                    
             
@@ -98,7 +120,7 @@ def validate(model, val_dataloader, lossFn, valSteps):
             valCorrect += (np.array(pred.cpu()) == np.array(y.cpu())).astype(int).sum()
     return totalValLoss, valCorrect, all_preds, targets
 
-def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=50):
+def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128, EPOCHS=50, subset_models=None):
     H = history
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model.to(device)
@@ -120,9 +142,9 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
     for e in range(0, EPOCHS):
         print("On Epoch = ",e)
         totalTrainLoss, trainCorrect, train_preds, train_targets = train(model=model, train_dataloader=train_dataloader,
-                                         opt = opt, lossFn=lossFn, trainSteps=trainSteps)
+                                         opt = opt, lossFn=lossFn, trainSteps=trainSteps, subset_models=subset_models)
         # switch off autograd for evaluation
-        totalValLoss, valCorrect, val_preds, val_targets = validate(model, val_dataloader, lossFn, valSteps)
+        totalValLoss, valCorrect, val_preds, val_targets = validate(model, val_dataloader, lossFn, valSteps, subset_models=subset_models)
         # calculate the average training and validation loss
         avgTrainLoss = totalTrainLoss / trainSteps
         avgValLoss = totalValLoss / valSteps
@@ -160,14 +182,22 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
 
     return best_model, best_mcc, best_f1
 
-def main():
-    torch.manual_seed(10)
 
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--train_sub', type=int, default=0)
+    args = parser.parse_args()
+
+
+    torch.manual_seed(10)
+    
     root_folder = "/content/drive/MyDrive/Masters/"
     # root_folder = "/content/drive/MyDrive/"
     data_folder = root_folder + "PepBind_LM/Data/"
     feature_folder = root_folder + "PepBind_LM/Features/"
-
+    model_folder = root_folder + "PepBind_LM/Model/"
     print("Preparing residue level features .. ...")
     train_dataset, test_dataset, train_samples = prepare_res_features(data_folder, feature_folder, 15)
 
@@ -185,30 +215,46 @@ def main():
     #                                                     stratify=train_y_subsets[0], 
     #                                                     test_size=0.2, random_state= 10)
     # print(len(X_train), len(y_train))
-    model = CNN2Layers(1024, 128, 5, 1, 2, 0.5, 256)
-    # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
-    optim = Adam(model.parameters(), lr=1e-3)
-    pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
-    lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
-    model_folder = root_folder + "PepBind_LM/Model/"
-    subset_model_list = []
-    count = 0
-    for sample_i in train_samples:
+    if args.train_sub == 1:
         model = CNN2Layers(1024, 128, 5, 1, 2, 0.5, 256)
+        # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
         optim = Adam(model.parameters(), lr=1e-3)
-        subset_model, mcc, f1 = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 50)
-        subset_model_list.append(subset_model)
-        count += 1
-        print("===========Model {} training finished ========== \n", format(count))
+        pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
+        lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
+        
+        subset_model_list = []
+        count = 0
+        for sample_i in train_samples:
+            model = CNN2Layers(1024, 128, 5, 1, 2, 0.5, 256)
+            optim = Adam(model.parameters(), lr=1e-3)
+            subset_model, mcc, f1 = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 50)
+            subset_model_list.append(subset_model)
+            count += 1
+            print("===========Model {} training finished ========== \n", format(count))
+            print("MCC: ", mcc, ", F1: ", f1)
+            with open(model_folder + 'subset_models_'+ str(count) + '.pkl', 'wb') as handle:
+                pkl.dump(subset_model, handle)
+        with open(model_folder + 'subset_models.pkl', 'wb') as handle:
+            pkl.dump(subset_model_list, handle)
+    else:
+        with open(model_folder + 'subset_models.pkl', 'rb') as handle:
+            subset_model_list = pkl.load( handle)
+        model = Logistic_Reg_model(no_input_features=10)
+        # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
+        optim = Adam(model.parameters(), lr=1e-3)
+        pos_weight = torch.tensor(np.array([1]), dtype=float).to(device)
+        lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
+        
+        ensemble_model, mcc, f1 = train_subset(train_dataset, model, optim, lossFn, H, trainSteps= 512, valSteps= 256,EPOCHS= 50, subset_models=subset_model_list)
+
+        print("===========Model training finished ========== \n")
         print("MCC: ", mcc, ", F1: ", f1)
-        with open(model_folder + 'subset_models_'+ str(count) + '.pkl', 'wb') as handle:
-            pkl.dump(subset_model, handle)
+    
+        
 
 
     endTime = time.time()
     
-    with open(model_folder + 'subset_models.pkl', 'wb') as handle:
-      pkl.dump(subset_model_list, handle)
 
 if __name__ == "__main__":
     main()
