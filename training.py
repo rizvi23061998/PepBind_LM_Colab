@@ -63,7 +63,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps, subset_models=None):
                 
                 for subset_model in subset_models:
                     out_i = torch.sigmoid(subset_model(x))
-                    out_i = out_i.reshape((1, trainSteps))
+                    out_i = out_i.reshape(( trainSteps, 1))
                     intermediate_out = torch.cat((intermediate_out,out_i))
         else:
             intermediate_out = x
@@ -105,7 +105,7 @@ def validate(model, val_dataloader, lossFn, valSteps, subset_models=None):
                 with torch.no_grad():                
                     for subset_model in subset_models:
                         out_i = torch.sigmoid(subset_model(x))
-                        out_i = out_i.reshape((1, valSteps))
+                        out_i = out_i.reshape((valSteps, 1))
                         # print(out_i.shape)
                         intermediate_out = torch.cat((intermediate_out,out_i))
             else:
