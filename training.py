@@ -256,7 +256,8 @@ def main():
         print("===========Model training finished ========== \n")
         print("MCC: ", mcc, ", F1: ", f1)
     
-        
+        with open(model_folder + 'ensembler.pkl', 'wb') as handle:
+            pkl.dump(ensemble_model, handle)
 
 
     endTime = time.time()
