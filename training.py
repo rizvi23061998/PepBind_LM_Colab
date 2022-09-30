@@ -258,8 +258,14 @@ def main():
     
         with open(model_folder + 'ensembler.pkl', 'wb') as handle:
             pkl.dump(ensemble_model, handle)
-
-
+        
+        test_dataloader = DataLoader(test_dataset, batch_size = 512, shuffle = True, drop_last=True)
+        test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataset, lossFn = lossFn, valSteps = 512, subset_models=subset_model_list)
+        test_corr = test_corr / test_dataset.__len__()
+        #calculate f1_score and mcc
+        f1_test = f1_score(test_preds, test_targets)
+        mcc_test = matthews_corrcoef(test_preds, test_targets, num_classes=2)
+        print("Accuracy: ", test_corr, ", F1: ", f1_test, ", MCC: ", mcc_test )
     endTime = time.time()
     
 
