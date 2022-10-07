@@ -89,7 +89,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps, subset_models=None):
     return totalTrainLoss, trainCorrect, all_preds, targets
 
 
-def validate(model, val_dataloader, lossFn, valSteps, subset_models=None, test=False):
+def validate(model, val_dataloader, lossFn, valSteps, subset_models=None):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     totalValLoss = 0
     valCorrect = 0
@@ -102,10 +102,6 @@ def validate(model, val_dataloader, lossFn, valSteps, subset_models=None, test=F
         # loop over the validation set
         for batch_idx, (x,y) in enumerate(val_dataloader):
             (x, y) = (x.to(device), y.to(device))
-            if test:
-                print(batch_idx)
-                print(x.shape)
-                print(y.shape)
             if subset_models != None:
                 intermediate_out = torch.tensor([])
                 intermediate_out = intermediate_out.to(device)
@@ -276,7 +272,7 @@ def main():
         lossFn = BCEWithLogitsLoss()
         print(test_dataset.__len__())
         test_dataloader = DataLoader(test_dataset, batch_size = 512, shuffle = True)
-        test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataset, lossFn = lossFn, valSteps = 512, subset_models=subset_model_list, test=True)
+        test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataloader, lossFn = lossFn, valSteps = 512, subset_models=subset_model_list)
         test_corr = test_corr / test_dataset.__len__()
         #calculate f1_score and mcc
         f1_test = f1_score(test_preds, test_targets)
