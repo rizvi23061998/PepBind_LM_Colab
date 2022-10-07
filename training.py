@@ -271,7 +271,7 @@ def main():
             ensemble_model = pkl.load(handle)
         lossFn = BCEWithLogitsLoss()
         print(test_dataset.__len__())
-        test_dataloader = DataLoader(test_dataset, batch_size = 512, shuffle = True)
+        test_dataloader = DataLoader(test_dataset, batch_size = 512, shuffle = True, drop_last=True)
         test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataloader, lossFn = lossFn, valSteps = 512, subset_models=subset_model_list)
         test_corr = test_corr / test_dataset.__len__()
         #calculate f1_score and mcc
