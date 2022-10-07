@@ -68,15 +68,18 @@ def train(model, train_dataloader, opt, lossFn, trainSteps, subset_models=None):
         else:
             intermediate_out = x
 
-        pred = torch.sigmoid(model(intermediate_out))
+        pred = (model(intermediate_out))
         pred = pred.reshape([trainSteps])
-        loss = lossFn(model(intermediate_out), y)
+        loss = lossFn(pred, y)
         # zero out the gradients, perform the backpropagation step,
         # and update the weights
         opt.zero_grad()
         loss.backward()
         opt.step()
+
+
         # print(type(pred))
+        pred = torch.sigmoid(pred)
         all_preds = torch.cat( (all_preds, pred.cpu().detach()) )
         targets = torch.cat( (targets, y.cpu().detach().int()) )
         pred = (pred>0.5).float()
@@ -114,10 +117,11 @@ def validate(model, val_dataloader, lossFn, valSteps, subset_models=None, test=F
                 intermediate_out = x
 
             
-            pred = torch.sigmoid(model(intermediate_out))
+            pred = model(intermediate_out)
             pred = pred.reshape([valSteps])
-            loss = lossFn(model(intermediate_out), y)                    
+            loss = lossFn(pred, y)                    
             
+            pred = torch.sigmoid(pred)
             all_preds = torch.cat( (all_preds, pred.cpu().detach()) )
             targets = torch.cat( (targets, y.cpu().detach().int()) )
 
@@ -265,7 +269,7 @@ def main():
         with open(model_folder + 'ensembler.pkl', 'rb') as handle:
             ensemble_model = pkl.load(handle)
         test_dataloader = DataLoader(test_dataset, batch_size = 512, shuffle = True)
-        test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataset, lossFn = lossFn, valSteps = 512, subset_models=subset_model_list)
+        test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataset, lossFn = lossFn, valSteps = 512, subset_models=subset_model_list, test=True)
         test_corr = test_corr / test_dataset.__len__()
         #calculate f1_score and mcc
         f1_test = f1_score(test_preds, test_targets)
