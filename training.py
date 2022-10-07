@@ -70,7 +70,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps, subset_models=None):
 
         pred = torch.sigmoid(model(intermediate_out))
         pred = pred.reshape([trainSteps])
-        loss = lossFn(pred, y)
+        loss = lossFn(model(intermediate_out), y)
         # zero out the gradients, perform the backpropagation step,
         # and update the weights
         opt.zero_grad()
@@ -86,7 +86,7 @@ def train(model, train_dataloader, opt, lossFn, trainSteps, subset_models=None):
     return totalTrainLoss, trainCorrect, all_preds, targets
 
 
-def validate(model, val_dataloader, lossFn, valSteps, subset_models=None):
+def validate(model, val_dataloader, lossFn, valSteps, subset_models=None, test=False):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     totalValLoss = 0
     valCorrect = 0
@@ -99,6 +99,8 @@ def validate(model, val_dataloader, lossFn, valSteps, subset_models=None):
         # loop over the validation set
         for batch_idx, (x,y) in enumerate(val_dataloader):
             (x, y) = (x.to(device), y.to(device))
+            if test:
+                print(x.shape)
             if subset_models != None:
                 intermediate_out = torch.tensor([])
                 intermediate_out = intermediate_out.to(device)
@@ -114,7 +116,7 @@ def validate(model, val_dataloader, lossFn, valSteps, subset_models=None):
             
             pred = torch.sigmoid(model(intermediate_out))
             pred = pred.reshape([valSteps])
-            loss = lossFn(pred, y)                    
+            loss = lossFn(model(intermediate_out), y)                    
             
             all_preds = torch.cat( (all_preds, pred.cpu().detach()) )
             targets = torch.cat( (targets, y.cpu().detach().int()) )
@@ -194,6 +196,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_sub', type=int, default=0)
     parser.add_argument('--pos_weight', type=int, default=16)
+    parser.add_argument('--test_only', type=int, default=1)
     args = parser.parse_args()
 
 
@@ -242,7 +245,7 @@ def main():
                 pkl.dump(subset_model, handle)
         with open(model_folder + 'subset_models.pkl', 'wb') as handle:
             pkl.dump(subset_model_list, handle)
-    else:
+    elif(args.test_only == 0):
         with open(model_folder + 'subset_models.pkl', 'rb') as handle:
             subset_model_list = pkl.load( handle)
         model = Logistic_Reg_model(no_input_features=10)
@@ -258,8 +261,10 @@ def main():
     
         with open(model_folder + 'ensembler.pkl', 'wb') as handle:
             pkl.dump(ensemble_model, handle)
-        
-        test_dataloader = DataLoader(test_dataset, batch_size = 512, shuffle = True, drop_last=True)
+    else:
+        with open(model_folder + 'ensembler.pkl', 'rb') as handle:
+            ensemble_model = pkl.load(handle)
+        test_dataloader = DataLoader(test_dataset, batch_size = 512, shuffle = True)
         test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataset, lossFn = lossFn, valSteps = 512, subset_models=subset_model_list)
         test_corr = test_corr / test_dataset.__len__()
         #calculate f1_score and mcc
