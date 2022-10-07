@@ -227,7 +227,7 @@ def main():
     #                                                     test_size=0.2, random_state= 10)
     # print(len(X_train), len(y_train))
     if args.train_sub == 1:
-        model = CNN2Layers(1024, 128, 5, 1, 2, 0.5, 256)
+        model = CNN2Layers(1024, 128, 5, 1, 2, 0.3, 256)
         # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
         optim = Adam(model.parameters(), lr=1e-3)
         pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
@@ -236,7 +236,7 @@ def main():
         subset_model_list = []
         count = 0
         for sample_i in train_samples:
-            model = CNN2Layers(1024, 128, 5, 1, 2, 0.5, 256)
+            model = CNN2Layers(1024, 128, 5, 1, 2, 0.3, 256)
             optim = Adam(model.parameters(), lr=1e-3)
             subset_model, mcc, f1 = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 50)
             subset_model_list.append(subset_model)
