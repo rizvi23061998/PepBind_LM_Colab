@@ -266,6 +266,9 @@ def main():
         with open(model_folder + 'ensembler.pkl', 'wb') as handle:
             pkl.dump(ensemble_model, handle)
     else:
+        with open(model_folder + 'subset_models.pkl', 'rb') as handle:
+            subset_model_list = pkl.load( handle)
+        
         with open(model_folder + 'ensembler.pkl', 'rb') as handle:
             ensemble_model = pkl.load(handle)
         lossFn = BCEWithLogitsLoss()
