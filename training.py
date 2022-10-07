@@ -103,7 +103,9 @@ def validate(model, val_dataloader, lossFn, valSteps, subset_models=None, test=F
         for batch_idx, (x,y) in enumerate(val_dataloader):
             (x, y) = (x.to(device), y.to(device))
             if test:
+                print(batch_idx)
                 print(x.shape)
+                print(y.shape)
             if subset_models != None:
                 intermediate_out = torch.tensor([])
                 intermediate_out = intermediate_out.to(device)
