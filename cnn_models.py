@@ -44,7 +44,7 @@ class Logistic_Reg_model(torch.nn.Module):
         y_predicted=(self.layer2(y_predicted))
         return y_predicted
 
-class LSTM_base(nn.ModuleList):
+class LSTM_base(torch.nn.ModuleList):
 
 	def __init__(self, config):
 		super(LSTM_base, self).__init__()
