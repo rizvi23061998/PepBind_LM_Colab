@@ -26,7 +26,7 @@ from torch import flatten
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, NLLLoss
 from torch.utils.data import random_split, DataLoader 
-from cnn_models import CNN2Layers, Logistic_Reg_model
+from cnn_models import CNN2Layers, Logistic_Reg_model, LSTM_base
 from torchsummary import summary
 from torchmetrics.functional import f1_score,matthews_corrcoef
 from dataset import Seq_Dataset
@@ -200,7 +200,11 @@ def main():
     parser.add_argument('--pos_weight', type=int, default=16)
     parser.add_argument('--test_only', type=int, default=1)
     args = parser.parse_args()
-
+    config = {"batch_size": 64,
+          "hidden_dim": 256,
+          "lstm_layers": 128,
+          "emdedding_len": 1024,
+          "dropout_ratio": 0.5}
 
     torch.manual_seed(10)
     
@@ -227,18 +231,19 @@ def main():
     #                                                     test_size=0.2, random_state= 10)
     # print(len(X_train), len(y_train))
     if args.train_sub == 1:
-        model = CNN2Layers(1024, 128, 5, 1, 2, 0.3, 256)
+        # model = CNN2Layers(1024, 128, 5, 1, 2, 0.3, 256)
         # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
-        optim = Adam(model.parameters(), lr=1e-3)
-        pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
-        lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
+        # optim = Adam(model.parameters(), lr=1e-3)
+        # pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
+        # lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
         
         subset_model_list = []
         count = 0
         for sample_i in train_samples:
-            model = CNN2Layers(1024, 128, 5, 1, 2, 0.3, 256)
+            # model = CNN2Layers(1024, 128, 5, 1, 2, 0.3, 256)
+            model = LSTM_base(config)
             optim = Adam(model.parameters(), lr=1e-3)
-            subset_model, mcc, f1 = train_subset(sample_i, model, optim, lossFn, H, trainSteps= 256, valSteps= 256,EPOCHS= 50)
+            subset_model, mcc, f1 = train_subset(sample_i, model, optim, lossFn, H, trainSteps= config["batch_size"], valSteps= config["batch_size"],EPOCHS= 50)
             subset_model_list.append(subset_model)
             count += 1
             print("===========Model {} training finished ========== \n", format(count))

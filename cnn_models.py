@@ -43,3 +43,38 @@ class Logistic_Reg_model(torch.nn.Module):
         y_predicted=self.layer1(x)
         y_predicted=(self.layer2(y_predicted))
         return y_predicted
+
+class LSTM_base(nn.ModuleList):
+
+	def __init__(self, config):
+		super(LSTM_base, self).__init__()
+		
+		self.batch_size = config["batch_size"]
+		self.hidden_dim = config["hidden_dim"]
+		self.LSTM_layers = config["lstm_layers"]
+		self.input_size = config["emdedding_len"] # embedding dimention
+        
+		
+		self.dropout = nn.Dropout(config["dropout_ratio"])
+		# self.embedding = nn.Embedding(self.input_size, self.hidden_dim, padding_idx=0)
+		self.lstm = nn.LSTM(input_size=self.input_size, hidden_size=self.hidden_dim, num_layers=self.LSTM_layers, batch_first=True)
+		self.fc1 = nn.Linear(in_features=self.hidden_dim, out_features=512)
+		self.fc2 = nn.Linear(512, 1)
+		
+	def forward(self, x):
+	
+		h = torch.zeros((self.LSTM_layers, x.size(0), self.hidden_dim))
+		c = torch.zeros((self.LSTM_layers, x.size(0), self.hidden_dim))
+		
+		torch.nn.init.xavier_normal_(h)
+		torch.nn.init.xavier_normal_(c)
+
+		out = x
+    # print(x.shape)
+		out, (hidden, cell) = self.lstm(out, (h,c))
+		out = self.dropout(out)
+		out = torch.nn.functional.relu(self.fc1(out[:,-1,:]))
+		out = self.dropout(out)
+		out = (self.fc2(out))
+
+		return out
