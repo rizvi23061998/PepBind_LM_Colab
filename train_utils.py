@@ -91,7 +91,7 @@ def prepare_seq_features(data_folder, feature_folder):
 
 
 
-def prepare_res_features(data_folder, feature_folder, pad_len):
+def prepare_res_features(data_folder, feature_folder, pad_len, trp = 1):
     with open(feature_folder + "train_feature_all.pkl", "rb") as fp:
         train_features = pkl.load(fp)
 
@@ -131,7 +131,9 @@ def prepare_res_features(data_folder, feature_folder, pad_len):
     for chain in train_features_padded:
         for residue_idx in range(pad_len,len(chain) - pad_len):
             residue_feature = chain[(residue_idx - pad_len): (residue_idx + pad_len + 1),:]
-            train_data_res.append(np.transpose(residue_feature))
+            if trp == 1:
+                residue_feature = np.transpose(residue_feature)
+            train_data_res.append(residue_feature)
         # print(len(chain)-30)
     print(len(train_data_res))
 
@@ -139,7 +141,9 @@ def prepare_res_features(data_folder, feature_folder, pad_len):
     for chain in test_features_padded:
         for residue_idx in range(pad_len,len(chain) - pad_len):
             residue_feature = chain[(residue_idx - pad_len): (residue_idx + pad_len + 1),:]
-            test_data_res.append(np.transpose(residue_feature))
+            if trp == 1:
+                residue_feature = np.transpose(residue_feature)
+            test_data_res.append(residue_feature)
 
     train_y_cat = np.concatenate(train_y)
     train_y = train_y_cat.tolist()

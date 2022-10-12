@@ -204,7 +204,8 @@ def main():
           "hidden_dim": 256,
           "lstm_layers": 128,
           "emdedding_len": 1024,
-          "dropout_ratio": 0.5}
+          "dropout_ratio": 0.5,
+          "trp": 0}
 
     torch.manual_seed(10)
     
@@ -214,7 +215,7 @@ def main():
     feature_folder = root_folder + "PepBind_LM/Features/"
     model_folder = root_folder + "PepBind_LM/Model/"
     print("Preparing residue level features .. ...")
-    train_dataset, test_dataset, train_samples = prepare_res_features(data_folder, feature_folder, 15)
+    train_dataset, test_dataset, train_samples = prepare_res_features(data_folder, feature_folder, 15, trp = config["trp"])
 
     H = {
     "train_loss": [],
