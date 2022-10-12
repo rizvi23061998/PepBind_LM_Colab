@@ -1,4 +1,4 @@
-import torch.nn
+import torch.nn 
 
 
 class CNN2Layers(torch.nn.Module):
@@ -55,11 +55,11 @@ class LSTM_base(nn.ModuleList):
 		self.input_size = config["emdedding_len"] # embedding dimention
         
 		
-		self.dropout = nn.Dropout(config["dropout_ratio"])
+		self.dropout = torch.nn.Dropout(config["dropout_ratio"])
 		# self.embedding = nn.Embedding(self.input_size, self.hidden_dim, padding_idx=0)
-		self.lstm = nn.LSTM(input_size=self.input_size, hidden_size=self.hidden_dim, num_layers=self.LSTM_layers, batch_first=True)
-		self.fc1 = nn.Linear(in_features=self.hidden_dim, out_features=512)
-		self.fc2 = nn.Linear(512, 1)
+		self.lstm = torch.nn.LSTM(input_size=self.input_size, hidden_size=self.hidden_dim, num_layers=self.LSTM_layers, batch_first=True)
+		self.fc1 = torch.nn.Linear(in_features=self.hidden_dim, out_features=512)
+		self.fc2 = torch.nn.Linear(512, 1)
 		
 	def forward(self, x):
 	
