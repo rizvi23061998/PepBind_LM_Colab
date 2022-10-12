@@ -234,8 +234,6 @@ def main():
         # model = CNN2Layers(1024, 128, 5, 1, 2, 0.3, 256)
         # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
         # optim = Adam(model.parameters(), lr=1e-3)
-        # pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
-        # lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
         
         subset_model_list = []
         count = 0
@@ -243,6 +241,9 @@ def main():
             # model = CNN2Layers(1024, 128, 5, 1, 2, 0.3, 256)
             model = LSTM_base(config)
             optim = Adam(model.parameters(), lr=1e-3)
+            pos_weight = torch.tensor(np.array([3]), dtype=float).to(device)
+            lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
+        
             subset_model, mcc, f1 = train_subset(sample_i, model, optim, lossFn, H, trainSteps= config["batch_size"], valSteps= config["batch_size"],EPOCHS= 50)
             subset_model_list.append(subset_model)
             count += 1
