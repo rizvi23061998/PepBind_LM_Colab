@@ -64,8 +64,8 @@ class LSTM_base(torch.nn.ModuleList):
         
     def forward(self, x):
     
-        h = torch.zeros((self.LSTM_layers, x.size(0), self.hidden_dim)).to(device)
-        c = torch.zeros((self.LSTM_layers, x.size(0), self.hidden_dim)).to(device)
+        h = torch.zeros((self.LSTM_layers, x.size(0), self.hidden_dim)).to(self.device)
+        c = torch.zeros((self.LSTM_layers, x.size(0), self.hidden_dim)).to(self.device)
         
         torch.nn.init.xavier_normal_(h)
         torch.nn.init.xavier_normal_(c)
