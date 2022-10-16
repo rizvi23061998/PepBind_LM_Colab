@@ -258,7 +258,7 @@ def main():
         # with open(model_folder + 'subset_models.pkl', 'rb') as handle:
         #     subset_model_list = pkl.load( handle)
         # model = Logistic_Reg_model(no_input_features=10)
-        model = CNN2Layers(in_channels= 1024, feature_channels= 128,kernel_size= 3,stride= 1,padding= 1,dropout= 0.7,batch_size= 512)
+        model = CNN2Layers(in_channels= 1024, feature_channels= 128,kernel_size= 5,stride= 1,padding= 2,dropout= 0.7,batch_size= 512)
         # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
         optim = Adam(model.parameters(), lr=1e-3)
         pos_weight = torch.tensor(np.array([args.pos_weight]), dtype=float).to(device)
@@ -272,15 +272,15 @@ def main():
         with open(model_folder + 'ensembler.pkl', 'wb') as handle:
             pkl.dump(ensemble_model, handle)
     else:
-        with open(model_folder + 'subset_models.pkl', 'rb') as handle:
-            subset_model_list = pkl.load( handle)
+        # with open(model_folder + 'subset_models.pkl', 'rb') as handle:
+        #     subset_model_list = pkl.load( handle)
         
         with open(model_folder + 'ensembler.pkl', 'rb') as handle:
             ensemble_model = pkl.load(handle)
         lossFn = BCEWithLogitsLoss()
         print(test_dataset.__len__())
         test_dataloader = DataLoader(test_dataset, batch_size = 512, shuffle = True, drop_last=True)
-        test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataloader, lossFn = lossFn, valSteps = 512, subset_models=subset_model_list)
+        test_loss, test_corr, test_preds, test_targets = validate(model = ensemble_model, val_dataloader = test_dataloader, lossFn = lossFn, valSteps = 512, subset_models=None)
         test_corr = test_corr / test_dataset.__len__()
         #calculate f1_score and mcc
         f1_test = f1_score(test_preds, test_targets)
