@@ -79,3 +79,5 @@ class LSTM_base(torch.nn.ModuleList):
         out = (self.fc2(out))
 
         return out
+
+

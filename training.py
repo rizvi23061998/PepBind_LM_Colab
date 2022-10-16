@@ -258,7 +258,7 @@ def main():
         # with open(model_folder + 'subset_models.pkl', 'rb') as handle:
         #     subset_model_list = pkl.load( handle)
         # model = Logistic_Reg_model(no_input_features=10)
-        model = CNN2Layers(in_channels= 1024, feature_channels= 128,kernel_size= 3,stride= 1,padding= 2,dropout= 0.7,batch_size= 512)
+        model = CNN2Layers(in_channels= 1024, feature_channels= 128,kernel_size= 3,stride= 1,padding= 1,dropout= 0.7,batch_size= 512)
         # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
         optim = Adam(model.parameters(), lr=1e-3)
         pos_weight = torch.tensor(np.array([args.pos_weight]), dtype=float).to(device)
