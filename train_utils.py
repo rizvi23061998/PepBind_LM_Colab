@@ -25,7 +25,7 @@ from torch import flatten
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, NLLLoss
 from torch.utils.data import random_split, DataLoader 
-from cnn_models import CNN2Layers
+from models import CNN2Layers
 from torchsummary import summary
 from torchmetrics.functional import f1_score,matthews_corrcoef
 from dataset import Seq_Dataset
