@@ -205,7 +205,7 @@ def main():
           "lstm_layers": 128,
           "emdedding_len": 1024,
           "dropout_ratio": 0.5,
-          "trp": 0}
+          "trp": 1}
 
     torch.manual_seed(10)
     
