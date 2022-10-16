@@ -58,8 +58,8 @@ class LSTM_base(torch.nn.ModuleList):
         self.dropout = torch.nn.Dropout(config["dropout_ratio"])
         # self.embedding = nn.Embedding(self.input_size, self.hidden_dim, padding_idx=0)
         self.lstm = torch.nn.LSTM(input_size=self.input_size, hidden_size=self.hidden_dim, num_layers=self.LSTM_layers, batch_first=True)
-        self.fc1 = torch.nn.Linear(in_features=self.hidden_dim, out_features=512)
-        self.fc2 = torch.nn.Linear(512, 1)
+        self.fc1 = torch.nn.Linear(in_features=self.hidden_dim, out_features=64)
+        self.fc2 = torch.nn.Linear(64, 1)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         
     def forward(self, x):
