@@ -190,6 +190,11 @@ def prepare_subsets(train_data_res, train_y, sample_reps):
     return train_subsets
 
 
+# def feature_selection(data):
+#     dataloader = train_dataloader = DataLoader(train_data, batch_size = trainSteps, shuffle = True, drop_last=True)
+#     return new_data
+
+
 class EarlyStopping():
     """
     Early stopping to stop the training when the loss does not improve after

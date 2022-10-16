@@ -26,7 +26,7 @@ from torch import flatten
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, NLLLoss
 from torch.utils.data import random_split, DataLoader 
-from cnn_models import CNN2Layers, Logistic_Reg_model, LSTM_base
+from models import CNN2Layers, Logistic_Reg_model, LSTM_base
 from torchsummary import summary
 from torchmetrics.functional import f1_score,matthews_corrcoef
 from dataset import Seq_Dataset
@@ -172,7 +172,7 @@ def train_subset(data, model, opt, lossFn, history, trainSteps=128, valSteps=128
         H["val_loss"].append(avgValLoss.cpu().detach().numpy())
         H["val_acc"].append(valCorrect)
         # print the model training and validation information
-        if e % 10 == 0:
+        if e % 1 == 0:
             print("[INFO] EPOCH: {}/{}".format(e + 1, EPOCHS))
             print("Train loss: {:.6f}, Train accuracy: {:.4f}, F1: {:.4f}, MCC: {:.4f}\n".format(
                 avgTrainLoss, trainCorrect, f1_train, mcc_train))
@@ -254,16 +254,17 @@ def main():
                 pkl.dump(subset_model, handle)
         with open(model_folder + 'subset_models.pkl', 'wb') as handle:
             pkl.dump(subset_model_list, handle)
-    elif(args.test_only == 0):
+    if(args.test_only == 0):
         with open(model_folder + 'subset_models.pkl', 'rb') as handle:
             subset_model_list = pkl.load( handle)
-        model = Logistic_Reg_model(no_input_features=10)
+        # model = Logistic_Reg_model(no_input_features=10)
+        model = CNN2Layers(in_channels= 1024, feature_channels= 128,kernel_size= 5,stride= 1,padding= 2,dropout= 0.7,batch_size= 512)
         # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
         optim = Adam(model.parameters(), lr=1e-3)
         pos_weight = torch.tensor(np.array([args.pos_weight]), dtype=float).to(device)
         lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
         
-        ensemble_model, mcc, f1 = train_subset(train_dataset, model, optim, lossFn, H, trainSteps= 512, valSteps= 256,EPOCHS= 50, subset_models=subset_model_list)
+        ensemble_model, mcc, f1 = train_subset(train_dataset, model, optim, lossFn, H, trainSteps= 512, valSteps= 512,EPOCHS= 50, subset_models=None)
 
         print("===========Model training finished ========== \n")
         print("MCC: ", mcc, ", F1: ", f1)
