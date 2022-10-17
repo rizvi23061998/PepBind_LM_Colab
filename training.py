@@ -265,7 +265,7 @@ def main():
         pos_weight = torch.tensor(np.array([args.pos_weight]), dtype=float).to(device)
         lossFn = BCEWithLogitsLoss(pos_weight=pos_weight)
         
-        ensemble_model, mcc, f1 = train_subset(train_dataset, model, optim, lossFn, H, trainSteps= 512, valSteps= 512,EPOCHS= 50, subset_models=None)
+        ensemble_model, mcc, f1 = train_subset(train_dataset, model, optim, lossFn, H, trainSteps= config["batch_size"], valSteps= config["batch_size"],EPOCHS= 50, subset_models=None)
 
         print("===========Model training finished ========== \n")
         print("MCC: ", mcc, ", F1: ", f1)
