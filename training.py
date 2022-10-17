@@ -200,12 +200,12 @@ def main():
     parser.add_argument('--pos_weight', type=int, default=16)
     parser.add_argument('--test_only', type=int, default=1)
     args = parser.parse_args()
-    config = {"batch_size": 64,
+    config = {"batch_size": 512,
           "hidden_dim": 256,
           "lstm_layers": 128,
           "emdedding_len": 1024,
           "dropout_ratio": 0.5,
-          "trp": 0}
+          "trp": 1}
 
     torch.manual_seed(10)
     
@@ -258,8 +258,8 @@ def main():
         # with open(model_folder + 'subset_models.pkl', 'rb') as handle:
         #     subset_model_list = pkl.load( handle)
         # model = Logistic_Reg_model(no_input_features=10)
-        # model = CNN2Layers(in_channels= 1024, feature_channels= 128,kernel_size= 5,stride= 1,padding= 2,dropout= 0.5,batch_size= 512)
-        model = LSTM_base(config)
+        model = CNN2Layers(in_channels= 1024, feature_channels= 512,kernel_size= 5,stride= 1,padding= 2,dropout= 0.5,batch_size= 512)
+        # model = LSTM_base(config)
         # print(summary(model, (31, 256, 5, 1, 2, 0.5, 128)))
         optim = Adam(model.parameters(), lr=1e-3)
         pos_weight = torch.tensor(np.array([args.pos_weight]), dtype=float).to(device)
